@@ -9,6 +9,7 @@ import DashboardStats from "@/components/DashboardStats";
 import HowItWorks from "@/components/HowItWorks";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
+import { Link as ScrollLink } from "react-scroll";
 
 const Index = () => {
   const [user, setUser] = useState<any>(null);
@@ -121,18 +122,23 @@ const Index = () => {
     <div className="flex items-center justify-between h-16">
       
       {/* Logo */}
-      <div className="flex items-center space-x-2">
-        <img
-          src="/vinathaal_icon.png"
-          alt="Vinathaal Icon"
-          className="w-14 h-14 object-contain"
-        />
-        <img
-          src="/vinathaal-heading-black.png"
-          alt="Vinathaal Heading"
-          className="h-[45px] w-30 object-contain"
-        />
-      </div>
+
+<ScrollLink to="hero" smooth={true} duration={800} offset={-70}>
+  <div className="flex items-center space-x-2 cursor-pointer">
+    <img
+      src="/vinathaal_icon.png"
+      alt="Vinathaal Icon"
+      className="w-14 h-14 object-contain"
+    />
+    <img
+      src="/vinathaal-heading-black.png"
+      alt="Vinathaal Heading"
+      className="h-[45px] w-30 object-contain"
+    />
+  </div>
+</ScrollLink>
+
+
 
       {/* Navigation Links */}
       <div className="hidden md:flex items-center space-x-8">
@@ -230,6 +236,7 @@ const Index = () => {
 
       {/* Hero Section - Always shown */}
       <section
+        id="hero"
         className="relative min-h-screen py-20 flex items-center overflow-hidden"
         style={{
           backgroundColor: '#ffffff',

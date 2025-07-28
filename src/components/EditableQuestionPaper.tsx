@@ -32,6 +32,7 @@ interface EditableQuestionPaperProps {
 const EditableQuestionPaper = ({ config, questions = [], onSave }: EditableQuestionPaperProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedConfig, setEditedConfig] = useState(config);
+  console.log("EditableQuestionPaper config:", editedConfig);
 
   const handleSave = () => {
     onSave(config.sections?.flatMap((section: any) => section.questions) || []);
@@ -135,21 +136,22 @@ const EditableQuestionPaper = ({ config, questions = [], onSave }: EditableQuest
           
           <div className="space-y-6">
             {section.questions?.map((question: Question, index: number) => (
-              <div key={question.id} className="question border-b border-slate-200 pb-6 last:border-b-0">
+              <div key={question.id} className="question">
                 <div className="question-header flex flex-col lg:flex-row justify-between items-start gap-4">
                   <div className="flex-1 w-full">
                     <div className="flex items-center gap-3 mb-3">
                       <span className="question-number text-lg font-medium">{index + 1}.</span>
-                      {question.difficulty && (
+                      {/* {question.difficulty && (
                         <span className={`difficulty-badge text-xs px-2 py-1 rounded-full ${getDifficultyColor(question.difficulty)}`}>
                           {question.difficulty}
                         </span>
-                      )}
+                      )} */}
+                      <div className="question-text text-slate-800 leading-relaxed ">
+                        {question.text}
+                      </div>
                     </div>
                     
-                    <div className="question-text text-slate-800 leading-relaxed mb-3">
-                      {question.text}
-                    </div>
+                    
                     
                     {editedConfig.type === 'mcq' && question.options && (
                       <div className="question-options mt-3 ml-4">
@@ -174,9 +176,9 @@ const EditableQuestionPaper = ({ config, questions = [], onSave }: EditableQuest
                       </div>
                     )}
                     
-                    <div className="unit-info text-sm text-slate-500 mt-3">
+                    {/* <div className="unit-info text-sm text-slate-500 mt-3">
                       (From {question.unit})
-                    </div>
+                    </div> */}
                   </div>
                   
                   <div className="text-right">

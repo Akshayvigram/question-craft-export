@@ -73,14 +73,18 @@ const Login = () => {
             to="/"
             className="inline-flex items-center space-x-2 text-primary hover:text-accent transition-colors"
           >
-            <FileText className="w-8 h-8" />
-            <span className="text-xl font-semibold">QuestionCraft</span>
+        <img
+          src="/vinathaal_icon.png"
+          alt="Vinathaal Icon"
+          className="w-14 h-14 object-contain"
+        /> 
+            <span className="text-2xl font-semibold">Vinathaal</span>
           </Link>
           <Link
             to="/"
-            className="absolute top-4 left-4 inline-flex items-center space-x-2 text-primary hover:text-accent transition-colors"
+            className="absolute top-6 left-14 inline-flex items-center space-x-2 text-primary hover:text-accent transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-6 h-6" />
             <span className="text-sm">Back to Home</span>
           </Link>
         </div>

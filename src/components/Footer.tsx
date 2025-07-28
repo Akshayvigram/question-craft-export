@@ -74,16 +74,8 @@ const Footer = () => {
             <h4 className="text-accent font-semibold mb-4">Get in Touch</h4>
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
-                <Phone className="w-4 h-4 text-accent" />
-                <span className="text-blue-200">+91 7010682506</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Phone className="w-4 h-4 text-accent" />
-                <span className="text-blue-200">+91 9750603988</span>
-              </div>
-              <div className="flex items-center space-x-2">
                 <Mail className="w-4 h-4 text-accent" />
-                <span className="text-blue-200">academy@questiongen.com</span>
+                <span className="text-blue-200">azhizensolutions@gmail.com</span>
               </div>
               <div className="flex items-start space-x-2">
                 <MapPin className="w-4 h-4 text-accent mt-1" />
@@ -100,7 +92,7 @@ const Footer = () => {
         <div className="border-t border-blue-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-center items-center">
             <p className="text-blue-200 text-sm">
-              © 2024 Question Paper Generator. All rights reserved.
+              © 2025 Vinathaal Question Paper Generator. All rights reserved.
             </p>
           </div>
         </div>

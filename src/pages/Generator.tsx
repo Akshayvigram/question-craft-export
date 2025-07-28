@@ -79,6 +79,9 @@ const Generator = () => {
   const [duration, setDuration] = useState("");
   const [syllabusFile, setSyllabusFile] = useState<File | null>(null);
   const [headerImage, setHeaderImage] = useState<string | null>(null);
+  const [syllabusText, setSyllabusText] = useState("");
+  const [isSubjectLocked, setIsSubjectLocked] = useState(false);
+
   const [sections, setSections] = useState<Section[]>([
     {
       id: "1",
@@ -103,13 +106,38 @@ const Generator = () => {
     }
   ]);
 
-  const handleSyllabusUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSyllabusUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      setSyllabusFile(file);
-      toast.success("Syllabus uploaded successfully!");
+    if (!file) return;
+  
+    setSyllabusFile(file);
+    toast.success("Syllabus file selected!");
+  
+    const formData = new FormData();
+    formData.append("image", file);
+  
+    try {
+      const res = await fetch("https://vinathaal.azhizen.com/api/extract-syllabus", {
+        method: "POST",
+        body: formData,
+      });
+  
+      if (!res.ok) {
+        throw new Error("Syllabus extraction failed.");
+      }
+  
+      const data = await res.json();
+      console.log("Extracted syllabus data:", data.subjectName, data.syllabusText);
+      // Optional: Set extracted data to state
+      setSubjectName(data.subjectName || "");
+      setSyllabusText(data.syllabusText || "");
+      setIsSubjectLocked(true);
+      toast.success("Syllabus extracted successfully!");
+    } catch (err) {
+      console.error("Error uploading syllabus:", err);
+      toast.error("Failed to extract syllabus.");
     }
-  };
+  };  
 
   const handleHeaderImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -328,6 +356,25 @@ const Generator = () => {
     return questions;
   };
 
+  const parseSyllabus = (text: string): { [key: string]: string } => {
+    const unitTopics: { [key: string]: string } = {};
+    // Regex to find "UNIT" followed by a Roman numeral or number, and then the unit title
+    const unitRegex = /(UNIT\s+[IVX\d]+[\s\S]*?)(?=\n\s*UNIT\s+[IVX\d]+|$)/g;
+  
+    let match;
+    while ((match = unitRegex.exec(text)) !== null) {
+      const unitBlock = match[1].trim();
+      // Extract the unit title (e.g., "UNIT I INTRODUCTION")
+      const titleMatch = unitBlock.match(/^(UNIT\s+[IVX\d]+)/);
+      if (titleMatch) {
+        const unitName = titleMatch[0].trim(); // e.g., "UNIT I"
+        const unitContent = unitBlock.replace(unitName, '').trim();
+        unitTopics[unitName] = unitContent;
+      }
+    }
+    return unitTopics;
+  };
+
   const totalMarks = sections.reduce((total, section) => {
     if (section.isAutoGenerate) {
       const baseMarks = section.autoConfig.questionCount * section.autoConfig.marksPerQuestion;
@@ -342,33 +389,79 @@ const Generator = () => {
     }
   }, 0);
 
-  const handleGenerate = () => {
-    if (!subjectName.trim()) {
-      toast.error("Please enter a subject name");
+  const handleGenerate = async () => {
+    // 1. Validate required fields
+    if (!subjectName.trim() || !syllabusText.trim()) {
+      toast.error("Please provide a subject name and syllabus.");
       return;
     }
-    
-    const processedSections = sections.map(section => ({
-      ...section,
-      questions: generateAutoQuestions(section)
-    }));
-    
-    const config = {
-      subjectName,
-      university,
-      examDate,
-      duration,
-      syllabusFile: syllabusFile?.name || null,
-      headerImage,
-      sections: processedSections,
-      totalMarks,
-      type: 'descriptive'
+
+    // Parse the syllabus text into the required structure
+    const parsedUnitTopics = parseSyllabus(syllabusText);
+
+    if (Object.keys(parsedUnitTopics).length === 0) {
+        toast.error("Could not parse units from the syllabus. Please check the format.");
+        return;
+    }
+
+    // Construct the payload with the 'unitTopics' field
+    const payload = {
+      university: university,
+      subjectName: subjectName,
+      examDate: examDate,
+      duration: duration,
+      headerImage: headerImage,
+      totalMarks: totalMarks,
+      // Use the parsed object instead of the raw string
+      unitTopics: parsedUnitTopics, 
+      sections: sections.map(section => ({
+        id: section.id,
+        name: section.name,
+        isAutoGenerate: section.isAutoGenerate,
+        autoConfig: section.isAutoGenerate ? section.autoConfig : undefined,
+        individualConfig: !section.isAutoGenerate ? section.individualConfig : undefined,
+        questions: !section.isAutoGenerate ? section.questions : [],
+      })),
     };
+
+    console.log("Sending corrected payload:", JSON.stringify(payload, null, 2));
     
-    sessionStorage.setItem('questionPaperConfig', JSON.stringify(config));
-    console.log("Generating question paper with:", config);
-    toast.success("Question paper generated successfully!");
-    navigate("/result");
+    // 3. Send the data to the backend API
+    try {
+      // The endpoint should be your actual backend API URL
+      const res = await fetch("https://vinathaal.azhizen.com/api/generate-questions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // You might need to include an auth token here
+          // 'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      const result = await res.json();
+
+      if (res.ok) {
+        const updatedConfig = {
+          ...payload,
+          sections: payload.sections.map((section, idx) => ({
+            ...section,
+            questions: result.sections?.[idx]?.questions || [],
+          })),
+          type: "descriptive",
+        };
+  
+        console.log("Saved to sessionStorage:", updatedConfig);
+        sessionStorage.setItem("questionPaperConfig", JSON.stringify(updatedConfig));        
+        toast.success("Question paper generated successfully!");
+        navigate("/result");
+      } else {
+        toast.error(result.message || "Failed to generate question paper.");
+      }
+    } catch (error) {
+      console.error("Error generating paper:", error);
+      toast.error("An error occurred while communicating with the server.");
+    }
   };
 
   const units = ["UNIT I", "UNIT II", "UNIT III", "UNIT IV", "UNIT V"];
@@ -406,7 +499,7 @@ const Generator = () => {
               <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer bg-gradient-subtle">
                 <input
                   type="file"
-                  accept=".pdf,.doc,.docx,.txt"
+                  accept=".pdf,.doc,.docx,.txt,.jpeg,.jpg"
                   onChange={handleSyllabusUpload}
                   className="hidden"
                   id="syllabus-upload"
@@ -422,7 +515,7 @@ const Generator = () => {
                     <>
                       <FileText className="w-12 h-12 mx-auto text-accent mb-4" />
                       <p className="text-text-primary font-medium">Click to upload your syllabus</p>
-                      <p className="text-sm text-text-secondary mt-2">PDF, DOC, DOCX, TXT up to 10MB</p>
+                      <p className="text-sm text-text-secondary mt-2">PDF, DOC, DOCX, TXT, JPG, JPEG up to 10MB</p>
                     </>
                   )}
                 </label>
@@ -492,6 +585,8 @@ const Generator = () => {
                   placeholder="e.g., MATRICES AND CALCULUS"
                   value={subjectName}
                   onChange={(e) => setSubjectName(e.target.value)}
+                  readOnly={isSubjectLocked}
+                  className={isSubjectLocked ? "cursor-not-allowed bg-muted text-muted-foreground" : ""}
                 />
               </div>
               <div className="space-y-2">

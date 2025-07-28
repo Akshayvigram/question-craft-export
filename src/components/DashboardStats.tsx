@@ -10,37 +10,33 @@ const DashboardStats = () => {
     satisfaction: 0,
   });
 
-  const finalStats = {
-    totalPapers: 15647,
-    activeUsers: 3241,
-    avgTime: 3,
-    satisfaction: 98,
-  };
-
   useEffect(() => {
-    const duration = 2000;
-    const steps = 60;
-    const interval = duration / steps;
+    fetch('https://vinathaal.azhizen.com/api/stats')
+      .then(res => res.json())
+      .then(data => {
+        const duration = 2000;
+        const steps = 60;
+        const interval = duration / steps;
+        let step = 0;
 
-    let step = 0;
-    const timer = setInterval(() => {
-      step++;
-      const progress = step / steps;
+        const timer = setInterval(() => {
+          step++;
+          const progress = step / steps;
 
-      setStats({
-        totalPapers: Math.floor(finalStats.totalPapers * progress),
-        activeUsers: Math.floor(finalStats.activeUsers * progress),
-        avgTime: Math.floor(finalStats.avgTime * progress),
-        satisfaction: Math.floor(finalStats.satisfaction * progress),
-      });
+          setStats({
+            totalPapers: Math.floor(data.totalPapers * progress),
+            activeUsers: Math.floor(data.activeUsers * progress),
+            avgTime: Math.floor(data.avgTime * progress),
+            satisfaction: Math.floor(data.satisfaction * progress),
+          });
 
-      if (step >= steps) {
-        clearInterval(timer);
-        setStats(finalStats);
-      }
-    }, interval);
-
-    return () => clearInterval(timer);
+          if (step >= steps) {
+            clearInterval(timer);
+            setStats(data);
+          }
+        }, interval);
+      })
+      .catch(err => console.error('Failed to load stats', err));
   }, []);
 
   const statCards = [

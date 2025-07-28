@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,6 +11,8 @@ import EditableQuestionPaper from "@/components/EditableQuestionPaper";
 import { generatePDF, generateDocx } from "@/utils/pdfGenerator";
 import axios from 'axios'
 // import { Blob } from "buffer";
+// import { generateWordDocument } from "@/utils/pdfGenerator";
+import html2pdf from 'html2pdf.js';
 
 interface QuestionPaperConfig {
   subjectName: string;
@@ -37,82 +39,184 @@ const Result = () => {
   const [showAnswerKey, setShowAnswerKey] = useState(false);
   const [answerKey, setAnswerKey] = useState<AnswerItem[]>([]);
   const [uploading, setUploading] = useState(false);
+  const paperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const savedConfig = sessionStorage.getItem('questionPaperConfig');
+    const savedConfig = sessionStorage.getItem("questionPaperConfig");
     if (savedConfig) {
-      setConfig(JSON.parse(savedConfig));
-    } else {
-      navigate('/generator');
-    }
-  }, [navigate]);
-
-  const handlePDFGenerate = async () => {
-    try {
-
-      setUploading(true);
-
       try {
-
-        const filename = (config?.subjectName || 'Question Paper') + ".pdf";
-        console.log(filename);
-
-        const blob = await generatePDF("question-paper-content", filename);
-        if (blob) {
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = `${filename}.pdf`;
-          link.click();
-          URL.revokeObjectURL(url);
-        }
-
-
-        toast.success("PDF export initiated - check your downloads folder");
-
-        const file = new File([blob], filename, { type: blob.type });
-        console.log(file.name);
-        console.log(file.type);
-
-        const payload = {
-          filename: file.name,
-          filetype: file.type
-        };
-
-        const response = await axios.get(`http://localhost:3001/get-upload-url`, {
-          params: payload
+        const parsed = JSON.parse(savedConfig);
+        console.log("Loaded config from sessionStorage:", parsed);
+        console.log("First section questions:", parsed.sections?.[0]?.questions);
+  
+        const cleanedSections = parsed.sections?.map(section => ({
+          ...section,
+          questions: section.questions || [],
+        })) || [];
+  
+        setConfig({
+          ...parsed,
+          sections: cleanedSections,
         });
-
-        const uploadUrl = response.data.uploadURL;
-        console.log(uploadUrl);
-
-        const ObjectUrl = response.data.objectURL;
-        console.log(ObjectUrl);
-
-
-        await axios.put(uploadUrl, blob, {
-          headers: {
-            'Content-Type': 'application/pdf',
-          },
-        });
-
-        alert('✅ File uploaded to S3 successfully!');
-
-
       } catch (err) {
-        console.error('❌ Upload failed:', err);
-        alert('Failed to upload file');
+        console.error("Failed to parse config:", err);
       }
+    } else {
+      navigate("/generator");
+    }
+  }, []);
 
-      alert('File Generated Succesfully');
-    } catch (err) {
-      console.error('error in generating', err);
+  // const handlePDFGenerate = async () => {
+  //   try {
 
-    } finally {
-      setUploading(false);
+  //     setUploading(true);
+
+  //     try {
+
+  //       const filename = (config?.subjectName || 'Question Paper') + ".pdf";
+  //       console.log(filename);
+
+  //       const blob = await generatePDF("question-paper-content", filename);
+  //       if (blob) {
+  //         const url = URL.createObjectURL(blob);
+  //         const link = document.createElement("a");
+  //         link.href = url;
+  //         link.download = `${filename}.pdf`;
+  //         link.click();
+  //         URL.revokeObjectURL(url);
+  //       }
+
+
+  //       toast.success("PDF export initiated - check your downloads folder");
+
+  //       const file = new File([blob], filename, { type: blob.type });
+  //       console.log(file.name);
+  //       console.log(file.type);
+
+  //       const payload = {
+  //         filename: file.name,
+  //         filetype: file.type
+  //       };
+
+  //       const response = await axios.get(`http://localhost:3001/get-upload-url`, {
+  //         params: payload
+  //       });
+
+  //       const uploadUrl = response.data.uploadURL;
+  //       console.log(uploadUrl);
+
+  //       const ObjectUrl = response.data.objectURL;
+  //       console.log(ObjectUrl);
+
+
+  //       await axios.put(uploadUrl, blob, {
+  //         headers: {
+  //           'Content-Type': 'application/pdf',
+  //         },
+  //       });
+
+  //       alert('✅ File uploaded to S3 successfully!');
+
+
+  //     } catch (err) {
+  //       console.error('❌ Upload failed:', err);
+  //       alert('Failed to upload file');
+  //     }
+
+  //     alert('File Generated Succesfully');
+  //   } catch (err) {
+  //     console.error('error in generating', err);
+
+  //   } finally {
+  //     setUploading(false);
+  //   }
+
+  // };
+
+  // const handleDownload = () => {
+  //   const element = paperRef.current;
+  //   console.log("Downloading PDF for element:", element);
+  //   if (element) {
+  //     html2pdf().from(element).set({
+  //       margin: [0.5, 0.5, 0.5, 0.5],
+  //       filename: `${config.subjectName.replace(/\s+/g, '_')}_Question_Paper.pdf`,
+  //       image: { type: 'jpeg', quality: 0.98 },
+  //       html2canvas: { scale: 2 },
+  //       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+  //     }).save();
+  //   }
+  // };
+
+
+
+  const handleDownload = async () => {
+  try {
+    setUploading(true);
+
+    const filename = (config?.subjectName || 'Question Paper') + ".pdf";
+    const element = paperRef.current;
+
+    if (!element) {
+      console.error("Element for PDF generation not found.");
+      return;
     }
 
-  };
+    // Step 1: Generate blob from html2pdf
+    const opt = {
+      margin: [0.5, 0.5, 0.5, 0.5],
+      filename: filename,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+
+    const blob = await html2pdf().from(element).set(opt).outputPdf('blob');
+
+    if (blob) {
+      // Step 2: Manual download using blob
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      toast.success("PDF downloaded and upload started...");
+
+      // Step 3: Prepare file for S3
+      const file = new File([blob], filename, { type: blob.type });
+
+      const payload = {
+        filename: file.name,
+        filetype: file.type
+      };
+
+      const response = await axios.get(`http://localhost:3001/get-upload-url`, {
+        params: payload
+      });
+
+      const uploadUrl = response.data.uploadURL;
+      const objectUrl = response.data.objectURL;
+
+      // Step 4: Upload to S3
+      await axios.put(uploadUrl, blob, {
+        headers: {
+          'Content-Type': 'application/pdf',
+        },
+      });
+
+      alert('✅ File uploaded to S3 successfully!');
+      console.log('S3 URL:', objectUrl);
+    }
+
+  } catch (err) {
+    console.error('❌ PDF generation/upload failed:', err);
+    alert('Something went wrong!');
+  } finally {
+    setUploading(false);
+  }
+};
+
 
   const handleWordGenerate = () => {
     const filename = config?.subjectName || 'question-paper';
@@ -135,9 +239,8 @@ const Result = () => {
           marks: q.marks || 5
         })) || []
       );
-
       // Simulate AI API call (replace with actual API)
-      const response = await fetch('/api/generate-answer-key', {
+      const response = await fetch('https://vinathaal.azhizen.com/api/generate-answer-key', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -152,9 +255,11 @@ const Result = () => {
       });
 
       let answerKeyData;
+      const data = await response.json(); // Read response body once
+      console.log("AI response:", data);
 
-      if (!response.ok) {
-        // Fallback: Generate sample answer key
+      if (!response.ok || !data.answerKey) {
+        // Fallback
         answerKeyData = questions.map((q, index) => ({
           questionNumber: q.number,
           question: q.text,
@@ -166,8 +271,27 @@ const Result = () => {
           totalMarks: q.marks
         }));
       } else {
-        const data = await response.json();
-        answerKeyData = data.answerKey;
+        // Clean JSON.parse if it's stringified JSON inside a string block
+        try {
+          if (typeof data.answerKey === "string") {
+            answerKeyData = JSON.parse(data.answerKey.replace(/```json|```/g, "").trim());
+          } else {
+            answerKeyData = data.answerKey;
+          }
+        } catch (err) {
+          console.error("Error parsing answer key:", err);
+          // Fallback
+          answerKeyData = questions.map((q, index) => ({
+            questionNumber: q.number,
+            question: q.text,
+            keyPoints: [
+              { point: `Key concept explanation for ${q.text.substring(0, 30)}...`, marks: Math.ceil(q.marks * 0.4) },
+              { point: `Supporting details and examples`, marks: Math.ceil(q.marks * 0.3) },
+              { point: `Conclusion and final thoughts`, marks: Math.floor(q.marks * 0.3) }
+            ],
+            totalMarks: q.marks
+          }));
+        }
       }
 
       // Save answer key to session storage
@@ -187,22 +311,6 @@ const Result = () => {
           marks: q.marks || 5
         })) || []
       );
-
-      const answerKeyData = questions.map((q, index) => ({
-        questionNumber: q.number,
-        question: q.text,
-        keyPoints: [
-          { point: `Key concept explanation for ${q.text.substring(0, 30)}...`, marks: Math.ceil(q.marks * 0.4) },
-          { point: `Supporting details and examples`, marks: Math.ceil(q.marks * 0.3) },
-          { point: `Conclusion and final thoughts`, marks: Math.floor(q.marks * 0.3) }
-        ],
-        totalMarks: q.marks
-      }));
-
-      sessionStorage.setItem('generatedAnswerKey', JSON.stringify(answerKeyData));
-
-      toast.success("Answer key generated with sample data!");
-      navigate('/answer-key');
     }
   };
 
@@ -265,7 +373,7 @@ const Result = () => {
               <span className="hidden sm:inline">Word</span>
               <span className="sm:hidden">DOC</span>
             </Button>
-            <Button onClick={handlePDFGenerate} className="bg-slate-900 hover:bg-slate-800" size="sm">
+            <Button onClick={handleDownload} className="bg-slate-900 hover:bg-slate-800" size="sm">
               <Download className="w-4 h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Export PDF</span>
               <span className="sm:hidden">PDF</span>
@@ -275,7 +383,7 @@ const Result = () => {
 
 
         <Card className="bg-white shadow-lg">
-          <CardContent className="p-4 sm:p-8">
+          <CardContent ref={paperRef} className="p-4 sm:p-8">
             <EditableQuestionPaper
               config={config}
               onSave={handleQuestionsSave}

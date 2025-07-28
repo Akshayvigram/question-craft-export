@@ -45,8 +45,12 @@ const ForgotPassword = () => {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex items-center space-x-2 text-slate-900 hover:text-slate-700">
-              <div className="text-3xl">📝</div>
-              <span className="text-xl font-semibold">QuestionPaper AI</span>
+        <img
+          src="/vinathaal_icon.png"
+          alt="Vinathaal Icon"
+          className="w-14 h-14 object-contain"
+        /> 
+            <span className="text-2xl font-semibold">Vinathaal</span>
             </Link>
           </div>
 
@@ -86,8 +90,12 @@ const ForgotPassword = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center space-x-2 text-slate-900 hover:text-slate-700">
-            <div className="text-3xl">📝</div>
-            <span className="text-xl font-semibold">QuestionPaper AI</span>
+        <img
+          src="/vinathaal_icon.png"
+          alt="Vinathaal Icon"
+          className="w-14 h-14 object-contain"
+        /> 
+            <span className="text-2xl font-semibold">Vinathaal</span>
           </Link>
         </div>
 
