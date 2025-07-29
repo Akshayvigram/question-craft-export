@@ -231,9 +231,6 @@ const Index = () => {
   </div>
 </nav>
 
-
-
-
       {/* Hero Section - Always shown */}
       <section
         id="hero"
@@ -329,14 +326,11 @@ const Index = () => {
   </section>
 )}
 
-
-
       {/* Dashboard Stats Section - Only show when NOT logged in */}
       {!user && <DashboardStats />}
 
       {/* How It Works Section - Only show when NOT logged in */}
       {!user && <HowItWorks />}
-
 
       {/* Popular Question Papers Section - Always shown */}
       <section className="py-20 bg-secondary/30">
@@ -355,8 +349,8 @@ const Index = () => {
     { preview: "question-paper.jpg" },
     { preview: "question-paper1.jpg" },
   ].map((template, index) => (
-    <div key={index} className="flex justify-center">
-      <Link to="/generator" className="w-full max-w-[300px] group transition-transform duration-300 hover:scale-105">
+    <div key={index} className="flex flex-col items-center">
+      <div className="w-full max-w-[300px] group transition-transform duration-300 hover:scale-105">
         <div className="relative w-full h-[340px] rounded-xl overflow-hidden border border-border/100 transition-all duration-300 bg-white/10 dark:bg-slate-800/20 backdrop-blur-md">
           <img
             src={template.preview}
@@ -364,17 +358,26 @@ const Index = () => {
             className="w-full h-full object-cover object-top rounded-xl"
           />
         </div>
-      </Link>
+      </div>
+      <Button 
+        size="sm" 
+        className="mt-4 px-6 py-2 bg-gradient-primary hover:opacity-90"
+        onClick={() => handleGeneratorClick("/generator")}
+      >
+        Choose Template
+      </Button>
     </div>
   ))}
 </div>
 
           {/* View All Templates Button */}
           <div className="text-center mt-12">
-            <Button size="lg" variant="outline" className="px-8 py-3 border-primary text-primary hover:bg-gradient-primary hover:text-primary-foreground" onClick={() => handleGeneratorClick("/generator")}>
-              View All Templates
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+            <Link to="/templates">
+              <Button size="lg" variant="outline" className="px-8 py-3 border-primary text-primary hover:bg-gradient-primary hover:text-primary-foreground">
+                View All Templates
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -406,7 +409,7 @@ const Index = () => {
               <FeatureCard
                 icon={<Download />}
                 title="Multiple Export Formats"
-                description="Download your papers as PDF or Word with professional formatting."
+                description="Download your question papers in PDF or Word format instantly."
               />
               <FeatureCard
                 icon={<Image />}

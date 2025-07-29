@@ -7,9 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Plus, Trash2, FileText, Image } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { ArrowLeft, Plus, Trash2, FileText, Image, X } from "lucide-react";
 import { toast } from "sonner";
-
 
 interface MCQQuestionConfig {
   id: string;
@@ -50,8 +50,18 @@ const MCQGenerator = () => {
 
     checkAuth();
   }, [navigate]);
-  
 
+  // Quiz form state
+  const [quizTitle, setQuizTitle] = useState("");
+  const [subject, setSubject] = useState("");
+  const [description, setDescription] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [currentTag, setCurrentTag] = useState("");
+  const [quizTopic, setQuizTopic] = useState("");
+  const [additionalContext, setAdditionalContext] = useState("");
+  const [numberOfQuestions, setNumberOfQuestions] = useState([5]);
+
+  // Existing state for backward compatibility
   const [subjectName, setSubjectName] = useState("");
   const [university, setUniversity] = useState("");
   const [examDate, setExamDate] = useState("");
@@ -198,25 +208,56 @@ const MCQGenerator = () => {
     }));
   };
 
+  const addTag = () => {
+    if (currentTag.trim() && !tags.includes(currentTag.trim())) {
+      setTags([...tags, currentTag.trim()]);
+      setCurrentTag("");
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addTag();
+    }
+  };
+
   const totalMarks = sections.reduce((total, section) => 
     total + (section.questions * section.marksPerQuestion), 0
   );
 
   const handleGenerate = () => {
-    if (!subjectName.trim()) {
-      toast.error("Please enter a subject name");
+    if (!quizTitle.trim() || quizTitle.length < 4) {
+      toast.error("Please enter a quiz title with at least 4 characters");
+      return;
+    }
+
+    if (!subject.trim()) {
+      toast.error("Please select a subject");
       return;
     }
     
     const config = {
-      subjectName,
+      subjectName: subject,
       university,
       examDate,
       duration,
       headerImage,
-      sections,
-      totalMarks,
-      type: 'mcq'
+      sections: sections.map(section => ({
+        ...section,
+        questions: numberOfQuestions[0]
+      })),
+      totalMarks: numberOfQuestions[0],
+      type: 'mcq',
+      quizTitle,
+      description,
+      tags,
+      quizTopic,
+      additionalContext
     };
     sessionStorage.setItem('questionPaperConfig', JSON.stringify(config));
     
@@ -225,381 +266,198 @@ const MCQGenerator = () => {
     navigate("/result");
   };
 
-  const units = ["UNIT I", "UNIT II", "UNIT III", "UNIT IV", "UNIT V"];
+  const subjects = [
+    "General Knowledge",
+    "Mathematics",
+    "Science",
+    "History",
+    "Geography",
+    "English",
+    "Computer Science",
+    "Physics",
+    "Chemistry",
+    "Biology"
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-<nav className="bg-white border-b border-slate-200 shadow-sm">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div className="flex items-center justify-between h-16">
-      {/* Left - Back link */}
-      <Link to="/" className="flex items-center space-x-2 text-slate-900 hover:text-slate-700">
-        <ArrowLeft className="w-5 h-5" />
-        <span>Back to Home</span>
-      </Link>
-
-      {/* Right - Logo */}
-      <div className="flex items-center space-x-2">
-        <img
-          src="/vinathaal%20logo.png"
-          alt="Vinathaal Logo"
-          className="h-16 w-auto object-contain"
-        />
-      </div>
-    </div>
-  </div>
-</nav>
-
-      <div className="max-w-6xl mx-auto px-4 py-8">
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-    {/* Syllabus Upload Card */}
-    <Card className="bg-gradient-card border-accent/20">
-      <CardHeader className="text-center">
-        <CardTitle className="flex items-center justify-center space-x-2 text-primary">
-          <FileText className="w-5 h-5" />
-          <span>Upload Syllabus </span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer bg-gradient-subtle">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleSyllabusUpload}
-            className="hidden"
-            id="syllabus-upload"
-          />
-          <label htmlFor="syllabus-upload" className="cursor-pointer">
-            {syllabusImage ? (
-              <div className="space-y-4">
-                <img src={syllabusImage} alt="Syllabus preview" className="max-h-32 mx-auto rounded-lg shadow-md" />
-                <p className="text-success font-medium">Syllabus uploaded successfully!</p>
-              </div>
-            ) : (
-              <>
-                <FileText className="w-12 h-12 mx-auto text-accent mb-4" />
-                <p className="text-text-primary font-medium">Click to upload your syllabus</p>
-                <p className="text-sm text-text-secondary mt-2">PNG, JPG up to 10MB</p>
-              </>
-            )}
-          </label>
+      <nav className="bg-white border-b border-slate-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <Link to="/" className="flex items-center space-x-2 text-slate-900 hover:text-slate-700">
+              <ArrowLeft className="w-5 h-5" />
+              <span>Back to Home</span>
+            </Link>
+            <div className="flex items-center space-x-2">
+              <img
+                src="/vinathaal%20logo.png"
+                alt="Vinathaal Logo"
+                className="h-16 w-auto object-contain"
+              />
+            </div>
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      </nav>
 
-    {/* Header Image Upload Card */}
-    <Card className="bg-gradient-card border-accent/20">
-      <CardHeader className="text-center">
-        <CardTitle className="flex items-center justify-center space-x-2 text-primary">
-          <Image className="w-5 h-5" />
-          <span>Upload Header Image (Optional)</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer bg-gradient-subtle">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleHeaderImageUpload}
-            className="hidden"
-            id="header-upload"
-          />
-          <label htmlFor="header-upload" className="cursor-pointer">
-            {headerImage ? (
-              <div className="space-y-4">
-                <img src={headerImage} alt="Header preview" className="max-h-32 mx-auto rounded-lg shadow-md" />
-                <p className="text-success font-medium">Header image uploaded successfully!</p>
-              </div>
-            ) : (
-              <>
-                <Image className="w-12 h-12 mx-auto text-accent mb-4" />
-                <p className="text-text-primary font-medium">Click to upload your university/institution header</p>
-                <p className="text-sm text-text-secondary mt-2">PNG, JPG up to 10MB</p>
-              </>
-            )}
-          </label>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-</div>
-
-
-<div className="max-w-4xl mx-auto mb-8">
-  <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <FileText className="w-5 h-5" />
-              <span>Configure MCQ Question Paper</span>
+      <div className="max-w-2xl mx-auto px-4 py-8">
+        <Card className="bg-white shadow-lg">
+          <CardHeader className="text-center pb-4">
+            <CardTitle className="text-2xl font-semibold text-slate-900">
+              Create a New Quiz
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="university">University/Institution</Label>
+            {/* Quiz Title */}
+            <div className="space-y-2">
+              <Label htmlFor="quiz-title" className="text-sm font-medium text-slate-700">
+                Quiz Title
+              </Label>
+              <Input
+                id="quiz-title"
+                placeholder="Enter quiz title (min 4 characters)"
+                value={quizTitle}
+                onChange={(e) => setQuizTitle(e.target.value)}
+                className="w-full"
+              />
+            </div>
+
+            {/* Subject */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-slate-700">Subject</Label>
+              <Select value={subject} onValueChange={setSubject}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select subject" />
+                </SelectTrigger>
+                <SelectContent>
+                  {subjects.map((subj) => (
+                    <SelectItem key={subj} value={subj}>
+                      {subj}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-sm font-medium text-slate-700">
+                Description <span className="text-slate-500">(Optional)</span>
+              </Label>
+              <Textarea
+                id="description"
+                placeholder="Enter quiz description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+                className="w-full"
+              />
+            </div>
+
+            {/* Tags */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-slate-700">
+                Tags <span className="text-slate-500">(Optional)</span>
+              </Label>
+              <div className="flex space-x-2">
                 <Input
-                  id="university"
-                  placeholder="e.g., Anna University"
-                  value={university}
-                  onChange={(e) => setUniversity(e.target.value)}
+                  placeholder="Add a tag and press Enter"
+                  value={currentTag}
+                  onChange={(e) => setCurrentTag(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="flex-1"
+                />
+                <Button
+                  onClick={addTag}
+                  variant="outline"
+                  className="bg-primary text-white hover:bg-primary/90"
+                >
+                  Add
+                </Button>
+              </div>
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-slate-100 text-slate-700"
+                    >
+                      {tag}
+                      <button
+                        onClick={() => removeTag(tag)}
+                        className="ml-1 text-slate-500 hover:text-slate-700"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Generate with AI Section */}
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-medium text-slate-900 mb-4">Generate with AI</h3>
+              
+              {/* Quiz Topic */}
+              <div className="space-y-2 mb-4">
+                <Label htmlFor="quiz-topic" className="text-sm font-medium text-slate-700">
+                  Quiz Topic
+                </Label>
+                <Input
+                  id="quiz-topic"
+                  placeholder="e.g. Solar System, World War II, JavaScript Basics"
+                  value={quizTopic}
+                  onChange={(e) => setQuizTopic(e.target.value)}
+                  className="w-full"
+                />
+                <p className="text-xs text-slate-500">This will be used as the quiz title</p>
+              </div>
+
+              {/* Additional Context */}
+              <div className="space-y-2 mb-4">
+                <Label htmlFor="additional-context" className="text-sm font-medium text-slate-700">
+                  Additional Context <span className="text-slate-500">(Optional)</span>
+                </Label>
+                <Textarea
+                  id="additional-context"
+                  placeholder="Add specific details, difficulty level, or target audience"
+                  value={additionalContext}
+                  onChange={(e) => setAdditionalContext(e.target.value)}
+                  rows={3}
+                  className="w-full"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="subject">Subject Name</Label>
-                <Input
-                  id="subject"
-                  placeholder="e.g., MATRICES AND CALCULUS"
-                  value={subjectName}
-                  onChange={(e) => setSubjectName(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="date">Exam Date</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={examDate}
-                  onChange={(e) => setExamDate(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="duration">Duration</Label>
-                <Input
-                  id="duration"
-                  placeholder="e.g., 3 Hours"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
+
+              {/* Number of Questions */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-slate-700">
+                  Number of Questions: {numberOfQuestions[0]}
+                </Label>
+                <Slider
+                  value={numberOfQuestions}
+                  onValueChange={setNumberOfQuestions}
+                  max={20}
+                  min={1}
+                  step={1}
+                  className="w-full"
                 />
               </div>
             </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">MCQ Sections Configuration</h3>
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm text-green-600 font-medium">
-                    Total Marks: {totalMarks}
-                  </span>
-                  <Button onClick={addSection} size="sm" variant="outline">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Section
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {sections.map((section, index) => (
-                  <div key={section.id} className="border border-slate-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="font-medium">Section Configuration</h4>
-                      {sections.length > 1 && (
-                        <Button
-                          onClick={() => removeSection(section.id)}
-                          size="sm"
-                          variant="outline"
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                      <div>
-                        <Label>Section Name</Label>
-                        <Input
-                          value={section.name}
-                          onChange={(e) => updateSection(section.id, 'name', e.target.value)}
-                          placeholder="Section A"
-                        />
-                      </div>
-                      <div>
-                        <Label>No. of Questions</Label>
-                        <Input
-                          type="number"
-                          value={section.questions}
-                          onChange={(e) => updateSection(section.id, 'questions', parseInt(e.target.value) || 1)}
-                          min="1"
-                        />
-                      </div>
-                      <div>
-                        <Label>Marks per Question</Label>
-                        <Input
-                          type="number"
-                          value={section.marksPerQuestion}
-                          onChange={(e) => updateSection(section.id, 'marksPerQuestion', parseInt(e.target.value) || 1)}
-                          min="1"
-                        />
-                      </div>
-                      <div>
-                        <Label>Difficulty Level</Label>
-                        <Select
-                          value={section.difficulty}
-                          onValueChange={(value) => updateSection(section.id, 'difficulty', value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Easy">Easy</SelectItem>
-                            <SelectItem value="Medium">Medium</SelectItem>
-                            <SelectItem value="Hard">Hard</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label className="mb-2 block">Units to Cover</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {units.map((unit) => (
-                          <Button
-                            key={unit}
-                            onClick={() => toggleUnit(section.id, unit)}
-                            variant={section.units.includes(unit) ? "default" : "outline"}
-                            size="sm"
-                            className={section.units.includes(unit) ? "bg-slate-900" : ""}
-                          >
-                            {unit}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Custom MCQ Questions */}
-                    <div className="mt-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h5 className="font-medium">Custom MCQ Questions (Optional)</h5>
-                        <Button
-                          onClick={() => addCustomMCQ(section.id)}
-                          size="sm"
-                          variant="outline"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add MCQ
-                        </Button>
-                      </div>
-                      
-                      {section.customQuestions.length > 0 && (
-                        <div className="space-y-4">
-                          {section.customQuestions.map((question) => (
-                            <div key={question.id} className="border border-slate-100 rounded p-4 bg-slate-50">
-                              <div className="flex justify-between items-start mb-3">
-                                <h6 className="text-sm font-medium text-slate-700">Custom MCQ Question</h6>
-                                <Button
-                                  onClick={() => removeCustomMCQ(section.id, question.id)}
-                                  size="sm"
-                                  variant="ghost"
-                                  className="text-red-600 hover:text-red-700"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                              
-                              <div className="space-y-3">
-                                <div>
-                                  <Label>Question Text</Label>
-                                  <Textarea
-                                    value={question.text}
-                                    onChange={(e) => updateCustomMCQ(section.id, question.id, 'text', e.target.value)}
-                                    placeholder="Enter your MCQ question here..."
-                                    className="min-h-[80px]"
-                                  />
-                                </div>
-                                
-                                <div>
-                                  <Label>Options</Label>
-                                  <div className="space-y-2">
-                                    {question.options.map((option, optionIndex) => (
-                                      <div key={optionIndex} className="flex items-center space-x-2">
-                                        <Input
-                                          value={option}
-                                          onChange={(e) => updateMCQOption(section.id, question.id, optionIndex, e.target.value)}
-                                          placeholder={`Option ${String.fromCharCode(65 + optionIndex)}`}
-                                        />
-                                        <Button
-                                          variant={question.correctAnswer === optionIndex ? "default" : "outline"}
-                                          size="sm"
-                                          onClick={() => updateCustomMCQ(section.id, question.id, 'correctAnswer', optionIndex)}
-                                          className="whitespace-nowrap"
-                                        >
-                                          {question.correctAnswer === optionIndex ? "Correct" : "Mark Correct"}
-                                        </Button>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                                
-                                <div className="grid grid-cols-3 gap-3">
-                                  <div>
-                                    <Label>Marks</Label>
-                                    <Input
-                                      type="number"
-                                      value={question.marks}
-                                      onChange={(e) => updateCustomMCQ(section.id, question.id, 'marks', parseInt(e.target.value) || 1)}
-                                      min="1"
-                                    />
-                                  </div>
-                                  
-                                  <div>
-                                    <Label>Difficulty</Label>
-                                    <Select
-                                      value={question.difficulty}
-                                      onValueChange={(value) => updateCustomMCQ(section.id, question.id, 'difficulty', value)}
-                                    >
-                                      <SelectTrigger>
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="Easy">Easy</SelectItem>
-                                        <SelectItem value="Medium">Medium</SelectItem>
-                                        <SelectItem value="Hard">Hard</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                  
-                                  <div>
-                                    <Label>Unit</Label>
-                                    <Select
-                                      value={question.unit}
-                                      onValueChange={(value) => updateCustomMCQ(section.id, question.id, 'unit', value)}
-                                    >
-                                      <SelectTrigger>
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        {units.map((unit) => (
-                                          <SelectItem key={unit} value={unit}>{unit}</SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {/* Generate Button */}
+            <div className="pt-4">
+              <Button 
+                onClick={handleGenerate}
+                className="w-full bg-primary hover:bg-primary/90 text-white py-3 text-lg"
+                disabled={!quizTitle.trim() || quizTitle.length < 4 || !subject.trim()}
+              >
+                Generate Questions
+              </Button>
             </div>
           </CardContent>
         </Card>
       </div>
-
-        <div className="text-center">
-          <Button 
-            onClick={handleGenerate}
-            size="lg" 
-            className="px-8 py-3 bg-slate-900 hover:bg-slate-800"
-          >
-            <FileText className="w-5 h-5 mr-2" />
-            Generate MCQ Paper
-          </Button>
-        </div>
-      </div>
+    </div>
   );
 };
 

@@ -1,48 +1,46 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import Generator from "./pages/Generator";
-import MCQGenerator from "./pages/MCQGenerator";
-import Result from "./pages/Result";
-import AnswerKey from "./pages/AnswerKey";
-import Pricing from "./pages/Pricing";
-import Support from "./pages/Support";
-import NotFound from "./pages/NotFound";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Index from './pages/Index';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import Generator from './pages/Generator';
+import QuestionBankGenerator from './components/QuestionBankGenerator';
+import MCQGenerator from './pages/MCQGenerator';
+import Result from './pages/Result';
+import AnswerKey from './pages/AnswerKey';
+import Pricing from './pages/Pricing';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import Support from './pages/Support';
+import Templates from './pages/Templates';
+import NotFound from './pages/NotFound';
+import { Toaster } from 'sonner';
+import './App.css';
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+function App() {
+  return (
+    <Router>
+      <div className="App">
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/generator" element={<Generator />} />
+          <Route path="/question-bank" element={<QuestionBankGenerator />} />
           <Route path="/mcq-generator" element={<MCQGenerator />} />
           <Route path="/result" element={<Result />} />
           <Route path="/answer-key" element={<AnswerKey />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/support" element={<Support />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/templates" element={<Templates />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+      </div>
+      <Toaster />
+    </Router>
+  );
+}
 
 export default App;
