@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Plus, Trash2, FileText, Image, Settings, Wand2, Brain } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Loader2, FileText, Image, Settings, Wand2, Brain } from "lucide-react";
 import { toast } from "sonner";
 
 interface QuestionConfig {
@@ -81,6 +81,7 @@ const Generator = () => {
   const [headerImage, setHeaderImage] = useState<string | null>(null);
   const [syllabusText, setSyllabusText] = useState("");
   const [isSubjectLocked, setIsSubjectLocked] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const [sections, setSections] = useState<Section[]>([
     {
@@ -127,8 +128,6 @@ const Generator = () => {
       }
   
       const data = await res.json();
-      console.log("Extracted syllabus data:", data.subjectName, data.syllabusText);
-      // Optional: Set extracted data to state
       setSubjectName(data.subjectName || "");
       setSyllabusText(data.syllabusText || "");
       setIsSubjectLocked(true);
@@ -390,6 +389,7 @@ const Generator = () => {
   }, 0);
 
   const handleGenerate = async () => {
+    setIsGenerating(true);
     // 1. Validate required fields
     if (!subjectName.trim() || !syllabusText.trim()) {
       toast.error("Please provide a subject name and syllabus.");
@@ -461,6 +461,8 @@ const Generator = () => {
     } catch (error) {
       console.error("Error generating paper:", error);
       toast.error("An error occurred while communicating with the server.");
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -952,14 +954,24 @@ const Generator = () => {
           </CardContent>
         </Card>
 
-        <div className="text-center">
-          <Button 
+        <div className="text-center pt-3">
+        <Button 
             onClick={handleGenerate}
             size="lg" 
             className="px-8 py-3 bg-gradient-primary hover:opacity-90 text-white"
+            disabled={isGenerating}
           >
-            <FileText className="w-5 h-5 mr-2" />
-            Generate Question Paper
+            {isGenerating ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <FileText className="w-5 h-5 mr-2" />
+                Generate Question Paper
+              </>
+            )}
           </Button>
         </div>
       </div>

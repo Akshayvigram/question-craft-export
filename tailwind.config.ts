@@ -95,28 +95,30 @@ export default {
 			transitionTimingFunction: {
 				'smooth': 'var(--transition-smooth)',
 			},
-			keyframes: {
-				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
-				},
-				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
-				}
-			},
-			animation: {
-				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+ keyframes: {
+    'accordion-down': {
+      from: { height: '0' },
+      to: { height: 'var(--radix-accordion-content-height)' }
+    },
+    'accordion-up': {
+      from: { height: 'var(--radix-accordion-content-height)' },
+      to: { height: '0' }
+    },
+    typing: {
+      from: { width: '0' },
+      to: { width: '100%' },
+    },
+    blink: {
+      '50%': { borderColor: 'transparent' },
+      '100%': { borderColor: 'hsl(var(--primary))' }
+    }
+  },
+  animation: {
+    'accordion-down': 'accordion-down 0.2s ease-out',
+    'accordion-up': 'accordion-up 0.2s ease-out',
+    typing: 'typing 2s steps(12) 1s 1 normal both',
+    blink: 'blink 0.7s step-end infinite'
+  }
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

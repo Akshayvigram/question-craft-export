@@ -1,112 +1,84 @@
+// server.js
+
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
-require('dotenv').config();
-const AWS = require('aws-sdk')
 
+// --- Import Factory Functions & Routers ---
+const loadConfig = require('./utils/config'); // Your async config loader
+const createDbPool = require('./awsdb');      // Factory for the DB pool
+const createTransporter = require('./utils/mailer'); // Factory for the mail transporter
+const createPerplexityService = require('./services/generateWithPerplexity'); 
+const authRoutes = require('./routes/auth');       // Auth router factory
+const statsRoutes = require('./routes/stats');     // Stats router factory
+const extractRoute = require('./routes/extract');  // Extract router factory
+const generateRoute = require('./routes/generate'); // Generate router factory
+const answerKeyRoute = require('./routes/generateAnswer'); // Answer Key router factory
 
-const authRoutes = require('./routes/auth');
-const forgotPasswordRoute = require('./routes/forgotPassword');
-const statsRoutes = require("./routes/stats") 
-const extractRoute = require('./routes/extract');
-const generateRoute = require('./routes/generate');
-const answerKeyRoute = require('./routes/generateAnswer');
-
-const app = express();
-
-// Enhanced CORS configuration
-app.use(cors({
-  origin: ['http://localhost:8080', 'http://localhost:3000', 'https://vinathaal.azhizen.com'],
-  credentials: true
-}));
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Add request logging middleware
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-  next();
-});
-
-// API routes
-app.use('/api', authRoutes);
-app.use('/api', forgotPasswordRoute); 
-app.use('/api', statsRoutes);
-app.use('/api/extract-syllabus', extractRoute);
-app.use("/api", generateRoute);
-app.use('/api', answerKeyRoute);
-
-const resetPasswordRoute = require('./routes/resetPassword');
-app.use('/api', resetPasswordRoute);
-
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({ message: 'Internal server error' });
-});
-
-const nodemailer = require('nodemailer');
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASSWORD
-  }
-});
-
-
-
-app.use(cors());
-const s3 = new AWS.S3({
-  region: process.env.AWS_REGION,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  },
-});
-
-app.get('/get-upload-url', async (req, res) => {
-
+/**
+ * Main function to initialize services and start the Express server.
+ */
+async function startServer() {
   try {
-    const { filename, filetype } = req.query;
+    // 1. LOAD CONFIGURATION
+    // This is the first and most critical step.
+    const config = await loadConfig();
+    console.log('✅ Configuration loaded successfully.');
 
-    const params = {
-      Bucket: process.env.S3_BUCKET_NAME,
-      Key: filename,
-      Expires: 300,
-      ContentType: filetype,
-    };
+    // 2. INITIALIZE SERVICES
+    // Create dependencies that rely on the loaded configuration.
+    const db = createDbPool(config);
+    const transporter = createTransporter(config);
 
+    // 3. CREATE EXPRESS APP
+    const app = express();
 
+    // 4. SET UP GLOBAL MIDDLEWARE
+    app.use(cors({
+      origin: ['http://localhost:8080', 'http://localhost:3000', config.FRONTEND_URL],
+      credentials: true
+    }));
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
 
-    const uploadURL = await s3.getSignedUrlPromise('putObject', params);
+    // Simple request logger
+    app.use((req, res, next) => {
+      console.log(`${new Date().toISOString()} - ${req.method} ${req.originalUrl}`);
+      next();
+    });
 
-    // Logs ObjectURL and the UploadUrl for testing and reference
-    const objectURL = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${filename}`;
-    console.log('Public S3 Object URL:', objectURL);
+    const perplexityService = createPerplexityService(config);
 
-    console.log(uploadURL);
-    res.send({ uploadURL, objectURL });
-  } catch (err) {
-    console.error('Error:' + err);
+    app.use('/api/auth', authRoutes(db, transporter, config));
+    app.use('/api', statsRoutes(db, config));
+    app.use('/api', extractRoute);
+    app.use('/api', generateRoute(perplexityService));
+    app.use('/api', answerKeyRoute(perplexityService));
+    
+    // --- System Routes ---
+    app.get('/health', (req, res) => {
+      res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+    });
+    
+    // 6. SET UP FINAL ERROR HANDLING MIDDLEWARE
+    // This should be the last middleware you use.
+    app.use((err, req, res, next) => {
+      console.error('Unhandled Error:', err);
+      res.status(500).json({ message: 'An internal server error occurred.' });
+    });
 
+    // 7. START THE SERVER
+    const PORT = config.PORT || 3001;
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`✅ Server is running on port ${PORT}`);
+      console.log(`📍 Health check available at http://localhost:${PORT}/health`);
+    });
+
+  } catch (error) {
+    // This will catch any fatal errors during the startup process.
+    console.error('❌ Fatal error during server startup:', error);
+    process.exit(1); // Exit the process with a failure code
   }
+}
 
-})
-
-
-// Start the server
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/health`);
-});
-
-
+// Run the application
+startServer();

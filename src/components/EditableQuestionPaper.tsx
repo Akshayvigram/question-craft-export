@@ -32,7 +32,6 @@ interface EditableQuestionPaperProps {
 const EditableQuestionPaper = ({ config, questions = [], onSave }: EditableQuestionPaperProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedConfig, setEditedConfig] = useState(config);
-  console.log("EditableQuestionPaper config:", editedConfig);
 
   const handleSave = () => {
     onSave(config.sections?.flatMap((section: any) => section.questions) || []);

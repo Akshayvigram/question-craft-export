@@ -40,13 +40,11 @@ function normalizeUnitsWithInference(text) {
   });
 }
 
-router.post('/', upload.single('image'), async (req, res) => {
-  console.log("📥 Received image upload:", req.file.originalname);
+router.post('/extract-syllabus', upload.single('image'), async (req, res) => {
   const imagePath = req.file.path;
   const preprocessedPath = imagePath + '-processed.png';
 
   try {
-    console.log("🛠️ Preprocessing image...");
     await sharp(imagePath)
       .resize({ width: 1500 })
       .grayscale()
@@ -55,24 +53,19 @@ router.post('/', upload.single('image'), async (req, res) => {
       .normalize()
       .toFile(preprocessedPath);
 
-    console.log("🔍 Running OCR...");
     const result = await Tesseract.recognize(preprocessedPath, 'eng', {
       tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:().,- ',
       preserve_interword_spaces: '1',
-      logger: m => console.log("[📊 Tesseract Log]", m)
     });
 
     let text = result.data.text || '';
-    console.log("📄 Raw OCR text length:", text.length);
 
     // Normalize Roman numerals (e.g. UNIT If → UNIT III)
     text = normalizeUnitsWithInference(text);
     text = '\n' + text.trim() + '\n';
-    console.log("✅ Normalized OCR Text:\n", text);
 
     // Extract subject name from first few lines
     const lines = text.split('\n').filter(Boolean).slice(0, 6);
-    console.log("🔹 Candidate lines for subject name:", lines);
 
     let subjectName = "Unknown";
 
@@ -94,9 +87,6 @@ router.post('/', upload.single('image'), async (req, res) => {
       unitStart !== -1
         ? text.slice(unitStart, endIndex).replace(/(UNIT\s+[IVX]+)/g, '\n\n$1')
         : text;
-
-    console.log("📚 Extracted syllabus content length:", unitsText.length);
-    console.log("✅ Extracted subject name:", subjectName);
 
     res.json({
       subjectName,

@@ -82,7 +82,6 @@ const AnswerKey = () => {
       </div>
     );
   }
-  console.log("Answer Key", answerKey);
   
 
   if (!config || answerKey.length === 0) {

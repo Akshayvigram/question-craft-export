@@ -10,6 +10,7 @@ import HowItWorks from "@/components/HowItWorks";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
 import { Link as ScrollLink } from "react-scroll";
+import { HelpCircle, Wallet } from "lucide-react";
 
 const Index = () => {
   const [user, setUser] = useState<any>(null);
@@ -120,113 +121,202 @@ const Index = () => {
 <nav className="bg-card/90 backdrop-blur-md border-b border-border sticky top-0 z-50">
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div className="flex items-center justify-between h-16">
-      
+
       {/* Logo */}
+      <ScrollLink to="hero" smooth={true} duration={800} offset={-70}>
+        <div className="flex items-center space-x-2 cursor-pointer">
+          <img
+            src="/vinathaal_icon.png"
+            alt="Vinathaal Icon"
+            className="w-14 h-14 object-contain"
+          />
+          <img
+            src="/vinathaal-heading-black.png"
+            alt="Vinathaal Heading"
+            className="h-[45px] w-30 object-contain"
+          />
+        </div>
+      </ScrollLink>
 
-<ScrollLink to="hero" smooth={true} duration={800} offset={-70}>
-  <div className="flex items-center space-x-2 cursor-pointer">
-    <img
-      src="/vinathaal_icon.png"
-      alt="Vinathaal Icon"
-      className="w-14 h-14 object-contain"
-    />
-    <img
-      src="/vinathaal-heading-black.png"
-      alt="Vinathaal Heading"
-      className="h-[45px] w-30 object-contain"
-    />
-  </div>
-</ScrollLink>
+{/* Navigation Links */}
+<div className="hidden md:flex items-center space-x-8">
+  {!user ? (
+    <>
+      {/* Pricing */}
+      <Link
+        to="/pricing"
+        className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
+      >
+        Pricing
+      </Link>
 
-
-
-      {/* Navigation Links */}
-      <div className="hidden md:flex items-center space-x-8">
-        <Link
-          to="/pricing"
-          className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground
-            after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px]
-            after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
+      {/* Generator Dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          className="relative font-medium flex items-center space-x-1 text-muted-foreground hover:text-foreground transition-colors after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
         >
-          Pricing
-        </Link>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className="relative font-medium flex items-center space-x-1 text-muted-foreground hover:text-foreground transition-colors
-              after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px]
-              after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
-          >
-            <span>Generator</span>
-            <ChevronDown className="w-4 h-4" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="w-64 p-2 rounded-xl shadow-lg border border-border bg-popover"
-          >
-            <DropdownMenuItem onClick={() => handleGeneratorClick("/mcq-generator")} asChild>
-              <Link
-                to="/mcq-generator"
-                className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gradient-primary text-sm transition-all text-foreground"
-              >
-                <Brain className="w-4 h-4" />
-                MCQ Generator
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleGeneratorClick("/generator")} asChild>
-              <Link
-                to="/generator"
-                className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gradient-primary text-sm transition-all text-foreground"
-              >
-                <Upload className="w-4 h-4" />
-                Generator using Syllabus
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleGeneratorClick("/generator")} asChild>
-              <Link
-                to="/generator"
-                className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gradient-primary text-sm transition-all text-foreground"
-              >
-                <FileText className="w-4 h-4" />
-                Generator using Question Bank
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <Link
-          to="/support"
-          className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground
-            after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px]
-            after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
+          <span>Generator</span>
+          <ChevronDown className="w-4 h-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          className="w-64 p-2 rounded-xl shadow-lg border border-border bg-popover"
         >
-          Support
-        </Link>
+          <DropdownMenuItem asChild>
+            <Link
+              to="/mcq-generator"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gradient-primary text-sm transition-all text-foreground"
+            >
+              <Brain className="w-4 h-4" />
+              MCQ Generator
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link
+              to="/generator"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gradient-primary text-sm transition-all text-foreground"
+            >
+              <Upload className="w-4 h-4" />
+              Generator using Syllabus
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link
+              to="/generator"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gradient-primary text-sm transition-all text-foreground"
+            >
+              <FileText className="w-4 h-4" />
+              Generator using Question Bank
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Support */}
+      <Link
+        to="/support"
+        className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
+      >
+        Support
+      </Link>
+    </>
+  ) : (
+    <>
+      {/* Generator Links shown after login */}
+      <Link
+        to="/mcq-generator"
+        className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
+      >
+        MCQ Generator
+      </Link>
+      <Link
+        to="/generator?mode=syllabus"
+        className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
+      >
+        Syllabus Generator
+      </Link>
+      <Link
+        to="/generator?mode=questionbank"
+        className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
+      >
+        Question Bank Generator
+      </Link>
+    </>
+  )}
+</div>
+
+
+      {/* Profile Section */}
+<div className="flex items-center space-x-4">
+  {user ? (
+    <div className="flex items-center gap-4">
+      
+      {/* Name Display */}
+      <div className="text-right hidden md:block leading-tight">
+        <p className="text-sm text-muted-foreground">Hi,</p>
+        <p className="text-base font-semibold text-foreground">{user.name || user.email}</p>
       </div>
 
-      {/* Auth Buttons / User Info */}
-      <div className="flex items-center space-x-4">
-        {user ? (
-          <div className="flex items-center space-x-2 text-muted-foreground">
-            <User className="w-4 h-4" />
-            <span className="hidden md:inline">Hi, {user.name || user.email}</span>
-            <Button variant="outline" className="hover:bg-gradient-primary" size="sm" onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-1" /> Logout
-            </Button>
+      {/* Profile Image with Gradient Hover and Dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <div className="relative w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-primary via-pink-500 to-yellow-400 hover:brightness-110 transition-shadow shadow-md cursor-pointer">
+            <div className="w-full h-full rounded-full overflow-hidden bg-background">
+              <img
+                src={user.profile || "profile.png"}
+                alt="Profile"
+                className="w-full h-full object-cover rounded-full"
+              />
+            </div>
           </div>
-        ) : (
-          <div className="flex items-center space-x-4">
-            <Link to="/login">
-              <Button variant="outline" className="px-8 py-3 hover:bg-gradient-primary">Login</Button>
-            </Link>
-            <Link to="/signup">
-              <Button className="px-8 py-3 bg-gradient-primary hover:brightness-110 transition-all">
-                Sign Up
-              </Button>
-            </Link>
-          </div>
-        )}
+        </DropdownMenuTrigger>
+<DropdownMenuContent
+  align="end"
+  className="w-[312px] mt-2 rounded-xl border border-border bg-white backdrop-blur-lg shadow-xl ring-1 ring-border right-0"
+>
+  {/* Get More Credits */}
+  <DropdownMenuItem asChild>
+    <Link
+      to="/pricing"
+      className="group flex items-center gap-3 px-4 py-3 rounded-md w-full transition-all hover:bg-gradient-primary"
+    >
+      <div className="p-2 rounded-full bg-primary/10 group-hover:bg-white/20 transition">
+        <Wallet className="w-5 h-5 text-primary group-hover:text-white" />
       </div>
+      <span className="text-sm font-medium text-foreground group-hover:text-white transition">
+        Get More Credits
+      </span>
+    </Link>
+  </DropdownMenuItem>
+
+  {/* Support */}
+  <DropdownMenuItem asChild>
+    <Link
+      to="/support"
+      className="group flex items-center gap-3 px-4 py-3 rounded-md w-full transition-all hover:bg-gradient-primary"
+    >
+      <div className="p-2 rounded-full bg-blue-500/10 group-hover:bg-white/20 transition">
+        <HelpCircle className="w-5 h-5 text-blue-500 group-hover:text-white" />
+      </div>
+      <span className="text-sm font-medium text-foreground group-hover:text-white transition">
+        Support
+      </span>
+    </Link>
+  </DropdownMenuItem>
+
+  {/* Logout */}
+  <DropdownMenuItem
+    onClick={handleLogout}
+    className="group flex items-center gap-3 px-4 py-3 rounded-md w-full cursor-pointer transition-all hover:bg-gradient-primary"
+  >
+    <div className="p-2 rounded-full bg-red-500/10 group-hover:bg-white/20 transition">
+      <LogOut className="w-5 h-5 text-red-500 group-hover:text-white" />
+    </div>
+    <span className="text-sm font-medium text-red-500 group-hover:text-white transition">
+      Log Out
+    </span>
+  </DropdownMenuItem>
+</DropdownMenuContent>
+
+
+      </DropdownMenu>
+    </div>
+  ) : (
+    <div className="flex items-center space-x-4">
+      <Link to="/login">
+        <Button variant="outline" className="px-8 py-3 hover:bg-gradient-primary hover:text-white transition-all">
+          Login
+        </Button>
+      </Link>
+      <Link to="/signup">
+        <Button className="px-8 py-3 bg-gradient-primary hover:brightness-110 transition-all">
+          Sign Up
+        </Button>
+      </Link>
+    </div>
+  )}
+</div>
+
     </div>
   </div>
 </nav>
@@ -243,12 +333,12 @@ const Index = () => {
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
-            Generate Question Papers with{" "}
-            <span className="bg-gradient-primary bg-clip-text text-transparent">
-              AI Precision
-            </span>
-          </h1>
+<h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
+  Generate Question Papers with{" "}
+  <span className="inline-block overflow-hidden whitespace-nowrap bg-gradient-primary bg-clip-text text-transparent">
+    AI Precision
+  </span>
+</h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
             Create professional question papers instantly with customizable sections, difficulty levels,
             and automated answer keys. Perfect for educators and institutions.

@@ -1,34 +1,33 @@
+// utils/mailer.js
+
 const nodemailer = require("nodemailer");
-require("dotenv").config();
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
+/**
+ * Creates and configures a Nodemailer transporter.
+ * @param {object} config - The application configuration object containing EMAIL_USER and EMAIL_PASS.
+ * @returns {object} The configured Nodemailer transporter instance.
+ */
+module.exports = function createTransporter(config) {
+  // Create the transporter using credentials from the config object
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: config.EMAIL_USER,
+      pass: config.EMAIL_PASS,
+    },
+    tls: {
+      rejectUnauthorized: false, // Use with caution, often for development with self-signed certs
+    },
+  });
 
-transporter.verify((err, success) => {
-  if (err) {
-    console.error("Mail transporter error ❌", err);
-  } else {
-    console.log("✅ Mail transporter ready");
-  }
-});
+  // Verify the connection configuration on startup
+  transporter.verify((error, success) => {
+    if (error) {
+      console.error("❌ Mail transporter verification failed:", error);
+    } else {
+      console.log("✅ Mail transporter is ready to send emails.");
+    }
+  });
 
-const sendResetEmail = async (to, resetLink) => {
-  const mailOptions = {
-    from: `"Legal Rights App" <${process.env.MAIL_USER}>`,
-    to,
-    subject: "Password Reset",
-    html: `<p>Click here to reset your password: <a href="${resetLink}">${resetLink}</a></p>`,
-  };
-
-  await transporter.sendMail(mailOptions);
+  return transporter;
 };
-
-module.exports = { sendResetEmail };

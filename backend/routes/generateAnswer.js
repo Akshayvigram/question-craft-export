@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const axios = require("axios");
-require("dotenv").config();
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`;
+
+// const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+// const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`;
+module.exports = function createAnsGenerateRoute(perplexityService) {
 
 router.post("/generate-answer-key", async (req, res) => {
   const questions = req.body.questionPaper?.questions || [];
@@ -16,16 +17,17 @@ router.post("/generate-answer-key", async (req, res) => {
   const prompt = generatePrompt(questions, req.body.questionPaper?.subject);
 
   try {
-    const geminiRes = await axios.post(GEMINI_ENDPOINT, {
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: prompt }]
-        }
-      ]
-    });
+    // const geminiRes = await axios.post(GEMINI_ENDPOINT, {
+    //   contents: [
+    //     {
+    //       role: "user",
+    //       parts: [{ text: prompt }]
+    //     }
+    //   ]
+    // });
 
-    const responseText = geminiRes.data.candidates?.[0]?.content?.parts?.[0]?.text;
+    // const responseText = geminiRes.data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const responseText = await perplexityService.generateWithPerplexity(prompt);
 
     // Parse only if it's clean JSON, or return as raw for safety
     let parsed = responseText;
@@ -73,5 +75,5 @@ function generatePrompt(questions, subject = null) {
   `;
   }
 
-  
-module.exports = router;
+  return router;
+};

@@ -46,8 +46,6 @@ const Result = () => {
     if (savedConfig) {
       try {
         const parsed = JSON.parse(savedConfig);
-        console.log("Loaded config from sessionStorage:", parsed);
-        console.log("First section questions:", parsed.sections?.[0]?.questions);
   
         const cleanedSections = parsed.sections?.map(section => ({
           ...section,
@@ -191,7 +189,7 @@ const Result = () => {
         filetype: file.type
       };
 
-      const response = await axios.get(`http://localhost:3001/get-upload-url`, {
+      const response = await axios.get(`https://vinathaal.azhizen.com/get-upload-url`, {
         params: payload
       });
 
@@ -256,7 +254,6 @@ const Result = () => {
 
       let answerKeyData;
       const data = await response.json(); // Read response body once
-      console.log("AI response:", data);
 
       if (!response.ok || !data.answerKey) {
         // Fallback
