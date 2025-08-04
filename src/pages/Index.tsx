@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { FileText, Upload, Download, Zap, User, LogOut, Brain, Settings, Image, FileKey, Share, Clock, BookOpen, ChevronDown, ArrowRight, Star } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { FileText, Upload, Download, Zap, User, LogOut, Brain, Settings, Image, FileKey, Share, Clock, BookOpen, ChevronDown, ArrowRight, Star, Users, Coins } from "lucide-react";
 import FeatureCard from "@/components/FeatureCard";
 import DashboardStats from "@/components/DashboardStats";
 import HowItWorks from "@/components/HowItWorks";
@@ -14,6 +14,7 @@ import { HelpCircle, Wallet } from "lucide-react";
 
 const Index = () => {
   const [user, setUser] = useState<any>(null);
+  const [userCredits, setUserCredits] = useState(100); // Mock credits data
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,15 +24,15 @@ const Index = () => {
 
       if (userData && authToken) {
         setUser(JSON.parse(userData));
+        // Mock credits fetch - in real app this would come from backend
+        setUserCredits(100);
       } else {
         setUser(null);
       }
     };
 
-    // Check auth status on component mount
     checkAuthStatus();
 
-    // Listen for storage changes (when user logs in/out in another tab)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "user" || e.key === "authToken") {
         checkAuthStatus();
@@ -60,7 +61,6 @@ const Index = () => {
       return;
     }
 
-    // Double check authentication before allowing access
     if (!authToken || !userData) {
       sessionStorage.setItem("redirectAfterLogin", path);
       navigate("/login");
@@ -142,7 +142,6 @@ const Index = () => {
 <div className="hidden md:flex items-center space-x-8">
   {!user ? (
     <>
-      {/* Pricing */}
       <Link
         to="/pricing"
         className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
@@ -150,7 +149,6 @@ const Index = () => {
         Pricing
       </Link>
 
-      {/* Generator Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger
           className="relative font-medium flex items-center space-x-1 text-muted-foreground hover:text-foreground transition-colors after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
@@ -192,7 +190,6 @@ const Index = () => {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Support */}
       <Link
         to="/support"
         className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
@@ -202,7 +199,6 @@ const Index = () => {
     </>
   ) : (
     <>
-      {/* Generator Links shown after login */}
       <Link
         to="/mcq-generator"
         className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
@@ -225,19 +221,16 @@ const Index = () => {
   )}
 </div>
 
-
       {/* Profile Section */}
 <div className="flex items-center space-x-4">
   {user ? (
     <div className="flex items-center gap-4">
       
-      {/* Name Display */}
       <div className="text-right hidden md:block leading-tight">
         <p className="text-sm text-muted-foreground">Hi,</p>
         <p className="text-base font-semibold text-foreground">{user.name || user.email}</p>
       </div>
 
-      {/* Profile Image with Gradient Hover and Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <div className="relative w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-primary via-pink-500 to-yellow-400 hover:brightness-110 transition-shadow shadow-md cursor-pointer">
@@ -254,6 +247,36 @@ const Index = () => {
   align="end"
   className="w-[312px] mt-2 rounded-xl border border-border bg-white backdrop-blur-lg shadow-xl ring-1 ring-border right-0"
 >
+  {/* Credits Display */}
+  <div className="px-4 py-3 border-b border-border">
+    <div className="flex items-center gap-3">
+      <div className="p-2 rounded-full bg-yellow-500/10">
+        <Coins className="w-5 h-5 text-yellow-500" />
+      </div>
+      <div>
+        <p className="text-sm font-medium text-foreground">Credits Remaining</p>
+        <p className="text-lg font-bold text-yellow-600">{userCredits}</p>
+      </div>
+    </div>
+  </div>
+
+  {/* Create Community */}
+  <DropdownMenuItem asChild>
+    <Link
+      to="/create-community"
+      className="group flex items-center gap-3 px-4 py-3 rounded-md w-full transition-all hover:bg-gradient-primary"
+    >
+      <div className="p-2 rounded-full bg-purple-500/10 group-hover:bg-white/20 transition">
+        <Users className="w-5 h-5 text-purple-500 group-hover:text-white" />
+      </div>
+      <span className="text-sm font-medium text-foreground group-hover:text-white transition">
+        Create Community
+      </span>
+    </Link>
+  </DropdownMenuItem>
+
+  <DropdownMenuSeparator />
+
   {/* Get More Credits */}
   <DropdownMenuItem asChild>
     <Link
@@ -297,7 +320,6 @@ const Index = () => {
     </span>
   </DropdownMenuItem>
 </DropdownMenuContent>
-
 
       </DropdownMenu>
     </div>

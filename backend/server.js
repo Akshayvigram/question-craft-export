@@ -13,6 +13,9 @@ const statsRoutes = require('./routes/stats');     // Stats router factory
 const extractRoute = require('./routes/extract');  // Extract router factory
 const generateRoute = require('./routes/generate'); // Generate router factory
 const answerKeyRoute = require('./routes/generateAnswer'); // Answer Key router factory
+const supportRoute = require('./routes/support'); // Support router factory 
+const slackAlertRoute = require('./routes/slack'); // Slack alert router factory
+const userRoutes = require('./routes/user'); // User management router factory
 
 /**
  * Main function to initialize services and start the Express server.
@@ -53,6 +56,9 @@ async function startServer() {
     app.use('/api', extractRoute);
     app.use('/api', generateRoute(perplexityService));
     app.use('/api', answerKeyRoute(perplexityService));
+    app.use('/api', supportRoute(transporter, config));
+    app.use('/api', slackAlertRoute(config));
+    app.use('/api/user', userRoutes(db));
     
     // --- System Routes ---
     app.get('/health', (req, res) => {

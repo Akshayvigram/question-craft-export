@@ -48,7 +48,7 @@ import {
 const contactFormSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
-  subject: z.string().min(5, "Subject must be at least 5 characters"),
+  subject: z.string().min(1, "Please select a purpose"),
   message: z.string().min(10, "Message must be at least 10 characters"),
 });
 
@@ -63,7 +63,6 @@ const Support = () => {
   const getUserData = () => {
     try {
       const userData = localStorage.getItem("user");
-      console.log(userData);
       return userData ? JSON.parse(userData) : null;
     } catch {
       return null;
@@ -82,6 +81,7 @@ const Support = () => {
     },
   });
 
+
   useEffect(() => {
     if (location.hash) {
       const scrollToSection = () => {
@@ -97,11 +97,36 @@ const Support = () => {
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const response = await fetch("https://vinathaal.azhizen.com/api/support", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error("Server error");
+      }
+
+      await fetch("https://vinathaal.azhizen.com/api/slack-alert", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: data.fullName,
+          email: data.email,
+          subject: data.subject,
+          message: data.message,
+        }),
+      });
+
       toast({
         title: "Message Sent Successfully!",
         description: "We'll get back to you within 24 hours.",
       });
+
       form.reset();
     } catch (error) {
       toast({
@@ -113,6 +138,7 @@ const Support = () => {
       setIsSubmitting(false);
     }
   };
+
 
   const faqs = [
     {

@@ -18,7 +18,9 @@ try {
     FRONTEND_URL: await getSecret('FRONTEND_URL'),
     PERPLEXITY_API_KEY: await getSecret('PERPLEXITY_API_KEY'),
     PERPLEXITY_ENDPOINT: await getSecret('PERPLEXITY_ENDPOINT'),
-    PERPLEXITY_MODEL: await getSecret('PERPLEXITY_MODEL')
+    PERPLEXITY_MODEL: await getSecret('PERPLEXITY_MODEL'),
+    SLACK_WEBHOOK_URL: await getSecret('SLACK_WEBHOOK_URL'),
+    
   };
   
   return config;
