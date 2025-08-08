@@ -8,22 +8,21 @@ import { generatePDF } from "./pdfGenerator"
 export const S3Upload = async (config, token) => {
     try {
 
-        console.log(config);
-        console.log(token);
+        // console.log(config);
+        console.log("Token:" + token);
 
 
         const paperData = typeof config === "string" ? JSON.parse(config) : config;
         const subjectName = paperData.subjectName;
-        console.log(subjectName);
+        console.log("Subject Name"+subjectName);
 
 
         // const filename = (config?.subjectName || 'Question Paper') + ".pdf";
         const now = new Date();
-        const timestamp = now.toISOString().replace(/[:.]/g, '-'); // ISO format with safe characters
 
         const filename = `${subjectName.replace(/\s+/g, '_')}_${token}.pdf`;
 
-        console.log(filename);
+        console.log("File Name"+filename);
 
         // console.log(filename);
 
@@ -31,8 +30,8 @@ export const S3Upload = async (config, token) => {
 
 
         const file = new File([blob], filename, { type: blob.type });
-        console.log(file.name);
-        console.log(file.type);
+        console.log("File.name"+file.name);
+        console.log("File.type"+file.type);
 
         const payload = {
             filename: file.name,
@@ -71,6 +70,7 @@ export const S3Upload = async (config, token) => {
             email,
             uploadURL: uploadUrl,
             objectURL: ObjectUrl,
+            subjectName: subjectName,
             dateTime,
         });
         
@@ -79,7 +79,11 @@ export const S3Upload = async (config, token) => {
             email,
             uploadURL: uploadUrl,
             objectURL: ObjectUrl,
+            subjectName: subjectName,
             dateTime,
+        })
+        .then(res => {
+            alert(res.data.message);
         })
 
 

@@ -11,15 +11,23 @@ import Footer from "@/components/Footer";
 import { toast } from "sonner";
 import { Link as ScrollLink } from "react-scroll";
 import { HelpCircle, Wallet } from "lucide-react";
+import axios from "axios";
 
 const Index = () => {
   const [user, setUser] = useState<any>(null);
   const [userCredits, setUserCredits] = useState(100); // Mock credits data
   const navigate = useNavigate();
+const [recentPapers, setRecentPapers] = useState([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState("");
+
+
+const storedUser = localStorage.getItem("user");
+const userEmail = storedUser ? JSON.parse(storedUser).email : null;
 
   useEffect(() => {
     const checkAuthStatus = () => {
-      const userData = localStorage.getItem("user");
+      const userData = localStorage.getItem("user"); // storedUser
       const authToken = localStorage.getItem("authToken");
 
       if (userData && authToken) {
@@ -70,32 +78,40 @@ const Index = () => {
     navigate(path);
   };
 
-  const recentPapers = [
-    {
-      id: 1,
-      subject: "MATRICES AND CALCULUS",
-      university: "Anna University",
-      date: "2025-01-15",
-      marks: 100,
-      sections: 3
-    },
-    {
-      id: 2,
-      subject: "DATA STRUCTURES",
-      university: "VTU",
-      date: "2025-01-10",
-      marks: 80,
-      sections: 2
-    },
-    {
-      id: 3,
-      subject: "DIGITAL ELECTRONICS",
-      university: "Mumbai University",
-      date: "2025-01-08",
-      marks: 75,
-      sections: 4
+
+  useEffect(() => {
+    if (!userEmail) {
+      setError("User email not found");
+      setLoading(false);
+      return;
     }
-  ];
+
+    const fetchRecentPapers = async () => {
+      try {
+        const res = await axios.post(
+          "http://localhost:3001/api/get-questions-paper-history",
+          { email: userEmail }
+        );
+        // Map backend fields to your UI fields
+        const mapped = res.data.data.map((item, idx) => ({
+          id: idx,
+          subject: item.subjectName || "N/A",
+          university: "N/A", // if available, replace with actual
+          marks: "-",         // if available from DB
+          sections: "-",      // if available from DB
+          date: item.created_at,
+          objectUrl: item.objectUrl
+        }));
+        setRecentPapers(mapped);
+      } catch (err) {
+        setError(err.response?.data?.message || "Failed to fetch papers");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecentPapers();
+  }, [userEmail]);
 
   const features = [
     {
@@ -382,7 +398,9 @@ const Index = () => {
   <section className="py-20 bg-background">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-      {/* Title */}
+      {recentPapers.length > 0 && (
+        <>
+        {/* Title */}
       <div className="text-center mb-12">
         <h2 className="text-3xl font-bold text-foreground mb-2">Your Recently Created Papers</h2>
         <p className="text-muted-foreground text-lg">
@@ -402,21 +420,21 @@ const Index = () => {
               <CardTitle className="text-xl font-semibold text-primary group-hover:underline">
                 {paper.subject}
               </CardTitle>
-              <CardDescription className="text-muted-foreground">{paper.university}</CardDescription>
+              {/* <CardDescription className="text-muted-foreground">{paper.university}</CardDescription> */}
             </div>
 
             {/* Details */}
             <CardContent className="space-y-4 text-sm text-muted-foreground">
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1">
+                  {/* <span className="flex items-center gap-1">
                     📝 Marks:{" "}
                     <span className="font-medium text-foreground">{paper.marks}</span>
-                  </span>
-                  <span className="flex items-center gap-1">
+                  </span> */}
+                  {/* <span className="flex items-center gap-1">
                     📚 Sections:{" "}
                     <span className="font-medium text-foreground">{paper.sections}</span>
-                  </span>
+                  </span> */}
                 </div>
                 <div className="text-xs text-muted-foreground/80">
                   📅 Created: {new Date(paper.date).toLocaleDateString()}
@@ -427,13 +445,15 @@ const Index = () => {
               <Button
                 variant="outline"
                 className="px-8 py-3 w-full hover:bg-gradient-primary transition-all"
+                onClick={ ()=> window.open(paper.objectUrl, "_blank")}
               >
                 View Paper
               </Button>
             </CardContent>
           </Card>
         ))}
-      </div>
+      </div></>
+      )}
     </div>
   </section>
 )}
