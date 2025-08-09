@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Edit, Save, X, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { S3Upload } from "@/utils/S3Uploads";
 
 interface SubQuestion {
   id: string;
@@ -25,16 +26,18 @@ interface Question {
 
 interface EditableQuestionPaperProps {
   config: any;
+  token: any;
   questions?: Question[];
   onSave: (updatedQuestions: Question[]) => void;
 }
 
-const EditableQuestionPaper = ({ config, questions = [], onSave }: EditableQuestionPaperProps) => {
+const EditableQuestionPaper = ({ config, token, questions = [], onSave }: EditableQuestionPaperProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedConfig, setEditedConfig] = useState(config);
 
-  const handleSave = () => {
-    onSave(config.sections?.flatMap((section: any) => section.questions) || []);
+  const handleSave = async () => {
+    await onSave(config.sections?.flatMap((section: any) => section.questions) || []);
+    await S3Upload(editedConfig, token);
     setIsEditing(false);
     toast.success("Question paper updated successfully!");
   };
@@ -98,7 +101,7 @@ const EditableQuestionPaper = ({ config, questions = [], onSave }: EditableQuest
             <Input
               value={editedConfig.university || ""}
               onChange={(e) => setEditedConfig({...editedConfig, university: e.target.value})}
-              placeholder="University Name"
+              placeholder=""
               className="text-center text-2xl font-bold"
             />
             <Input

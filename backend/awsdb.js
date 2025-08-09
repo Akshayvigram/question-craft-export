@@ -17,6 +17,7 @@ module.exports = function createDbPool(config) {
     database: config.DB_NAME,
     connectionLimit: 10,
     waitForConnections: true,
+    dateStrings: true
   });
 
   // Promisify the pool for async/await support

@@ -1,5 +1,5 @@
-import { useState ,useEffect } from "react";
-import { Link, useNavigate} from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,8 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Plus, Trash2, Loader2, FileText, Image, Settings, Wand2, Brain } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, FileText, Image, Settings, Wand2, Brain, Scale, File, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { S3Upload } from "@/utils/S3Uploads";
 
 interface QuestionConfig {
   id: string;
@@ -56,12 +57,12 @@ interface Section {
 const Generator = () => {
   const navigate = useNavigate();
 
-    // Check authentication on component mount
+  // Check authentication on component mount
   useEffect(() => {
     const checkAuth = () => {
       const authToken = localStorage.getItem('authToken');
       const userData = localStorage.getItem('user');
-      
+
       if (!authToken || !userData) {
         // Store current path for redirect after login
         sessionStorage.setItem('redirectAfterLogin', '/generator');
@@ -82,6 +83,7 @@ const Generator = () => {
   const [syllabusText, setSyllabusText] = useState("");
   const [isSubjectLocked, setIsSubjectLocked] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const [sections, setSections] = useState<Section[]>([
     {
@@ -110,23 +112,23 @@ const Generator = () => {
   const handleSyllabusUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-  
+
     setSyllabusFile(file);
     toast.success("Syllabus file selected!");
-  
+
     const formData = new FormData();
     formData.append("image", file);
-  
+
     try {
       const res = await fetch("https://vinathaal.azhizen.com/api/extract-syllabus", {
         method: "POST",
         body: formData,
       });
-  
+
       if (!res.ok) {
         throw new Error("Syllabus extraction failed.");
       }
-  
+
       const data = await res.json();
       setSubjectName(data.subjectName || "");
       setSyllabusText(data.syllabusText || "");
@@ -136,7 +138,7 @@ const Generator = () => {
       console.error("Error uploading syllabus:", err);
       toast.error("Failed to extract syllabus.");
     }
-  };  
+  };
 
   const handleHeaderImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -194,7 +196,7 @@ const Generator = () => {
   const generateIndividualQuestions = (section: Section): QuestionConfig[] => {
     const questions: QuestionConfig[] = [];
     const { aiQuestionCount, manualQuestionCount, defaultMarks, defaultDifficulty, defaultUnit, defaultSubQuestionsCount } = section.individualConfig;
-    
+
     for (let i = 0; i < aiQuestionCount; i++) {
       questions.push({
         id: `ai-${Date.now()}-${i}`,
@@ -205,7 +207,7 @@ const Generator = () => {
         isAIGenerated: true
       });
     }
-    
+
     for (let i = 0; i < manualQuestionCount; i++) {
       questions.push({
         id: `manual-${Date.now()}-${i}`,
@@ -218,7 +220,7 @@ const Generator = () => {
         subQuestions: []
       });
     }
-    
+
     return questions;
   };
 
@@ -229,7 +231,7 @@ const Generator = () => {
   };
 
   const updateSection = (id: string, field: keyof Section, value: any) => {
-    setSections(sections.map(section => 
+    setSections(sections.map(section =>
       section.id === id ? { ...section, [field]: value } : section
     ));
   };
@@ -329,7 +331,7 @@ const Generator = () => {
 
   const generateAutoQuestions = (section: Section) => {
     const questions: QuestionConfig[] = [];
-    
+
     if (section.isAutoGenerate) {
       for (let i = 0; i < section.autoConfig.questionCount; i++) {
         const unitIndex = i % section.autoConfig.units.length;
@@ -346,12 +348,12 @@ const Generator = () => {
     } else {
       questions.push(...section.questions.map(q => ({
         ...q,
-        text: q.isAIGenerated 
+        text: q.isAIGenerated
           ? `AI will generate a ${q.difficulty.toLowerCase()} level question from ${q.unit} (${q.marks} marks)${q.subQuestionsCount > 0 ? ` with ${q.subQuestionsCount} sub-questions` : ''}`
           : q.text || ""
       })));
     }
-    
+
     return questions;
   };
 
@@ -359,7 +361,7 @@ const Generator = () => {
     const unitTopics: { [key: string]: string } = {};
     // Regex to find "UNIT" followed by a Roman numeral or number, and then the unit title
     const unitRegex = /(UNIT\s+[IVX\d]+[\s\S]*?)(?=\n\s*UNIT\s+[IVX\d]+|$)/g;
-  
+
     let match;
     while ((match = unitRegex.exec(text)) !== null) {
       const unitBlock = match[1].trim();
@@ -400,8 +402,8 @@ const Generator = () => {
     const parsedUnitTopics = parseSyllabus(syllabusText);
 
     if (Object.keys(parsedUnitTopics).length === 0) {
-        toast.error("Could not parse units from the syllabus. Please check the format.");
-        return;
+      toast.error("Could not parse units from the syllabus. Please check the format.");
+      return;
     }
 
     // Construct the payload with the 'unitTopics' field
@@ -413,7 +415,7 @@ const Generator = () => {
       headerImage: headerImage,
       totalMarks: totalMarks,
       // Use the parsed object instead of the raw string
-      unitTopics: parsedUnitTopics, 
+      unitTopics: parsedUnitTopics,
       sections: sections.map(section => ({
         id: section.id,
         name: section.name,
@@ -425,7 +427,7 @@ const Generator = () => {
     };
 
     console.log("Sending corrected payload:", JSON.stringify(payload, null, 2));
-    
+
     // 3. Send the data to the backend API
     try {
       // The endpoint should be your actual backend API URL
@@ -438,7 +440,7 @@ const Generator = () => {
         },
         body: JSON.stringify(payload),
       });
-  
+
       const result = await res.json();
 
       if (res.ok) {
@@ -450,9 +452,18 @@ const Generator = () => {
           })),
           type: "descriptive",
         };
-  
+
         console.log("Saved to sessionStorage:", updatedConfig);
-        sessionStorage.setItem("questionPaperConfig", JSON.stringify(updatedConfig));        
+        sessionStorage.setItem("questionPaperConfig", JSON.stringify(updatedConfig));
+
+        const array = new Uint32Array(1);
+        crypto.getRandomValues(array);
+        const token = array[0].toString(36);
+        console.log(token);
+        
+
+        sessionStorage.setItem("token", token);
+        sessionStorage.setItem("shouldUploadOnce", "true");
         toast.success("Question paper generated successfully!");
         navigate("/result");
       } else {
@@ -641,7 +652,7 @@ const Generator = () => {
                         </Button>
                       )}
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                       <div>
                         <Label>Section Name</Label>
@@ -669,7 +680,7 @@ const Generator = () => {
                           Bulk AI Generation Settings
                         </h5>
                         <p className="text-sm text-muted-foreground">Configure common settings for all questions in this section</p>
-                        
+
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           <div>
                             <Label>Number of Questions</Label>
@@ -681,7 +692,7 @@ const Generator = () => {
                               max="20"
                             />
                           </div>
-                          
+
                           <div>
                             <Label>Marks per Question</Label>
                             <Input
@@ -692,7 +703,7 @@ const Generator = () => {
                               max="20"
                             />
                           </div>
-                          
+
                           <div>
                             <Label>Difficulty Level</Label>
                             <Select
@@ -709,7 +720,7 @@ const Generator = () => {
                               </SelectContent>
                             </Select>
                           </div>
-                          
+
                           <div>
                             <Label>Sub-questions per Question</Label>
                             <Input
@@ -721,7 +732,7 @@ const Generator = () => {
                             />
                           </div>
                         </div>
-                        
+
                         <div>
                           <Label>Units to Include</Label>
                           <div className="flex flex-wrap gap-2 mt-2">
@@ -746,7 +757,7 @@ const Generator = () => {
                           Individual Question Configuration
                         </h5>
                         <p className="text-sm text-muted-foreground">Specify how many AI and manual questions you need, then configure each one individually</p>
-                        
+
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-card/50 p-4 rounded-lg">
                           <div>
                             <Label>AI Questions</Label>
@@ -759,7 +770,7 @@ const Generator = () => {
                               placeholder="0"
                             />
                           </div>
-                          
+
                           <div>
                             <Label>Manual Questions</Label>
                             <Input
@@ -771,7 +782,7 @@ const Generator = () => {
                               placeholder="0"
                             />
                           </div>
-                          
+
                           <div>
                             <Label>Default Marks</Label>
                             <Input
@@ -782,7 +793,7 @@ const Generator = () => {
                               max="20"
                             />
                           </div>
-                          
+
                           <div>
                             <Label>Default Difficulty</Label>
                             <Select
@@ -799,7 +810,7 @@ const Generator = () => {
                               </SelectContent>
                             </Select>
                           </div>
-                          
+
                           <div>
                             <Label>Default Unit</Label>
                             <Select
@@ -816,7 +827,7 @@ const Generator = () => {
                               </SelectContent>
                             </Select>
                           </div>
-                          
+
                           <div>
                             <Label>Default Sub-questions</Label>
                             <Input
@@ -828,7 +839,7 @@ const Generator = () => {
                             />
                           </div>
                         </div>
-                        
+
                         {section.questions.length === 0 ? (
                           <div className="text-center py-8 text-muted-foreground bg-card/30 rounded-lg">
                             <Brain className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
@@ -838,12 +849,12 @@ const Generator = () => {
                         ) : (
                           <div className="bg-card/30 p-3 rounded-lg">
                             <p className="text-sm text-accent">
-                              <strong>Total Questions:</strong> {section.questions.length} 
+                              <strong>Total Questions:</strong> {section.questions.length}
                               ({section.questions.filter(q => q.isAIGenerated).length} AI + {section.questions.filter(q => !q.isAIGenerated).length} Manual)
                             </p>
                           </div>
                         )}
-                        
+
                         <div className="space-y-4">
                           {section.questions.map((question, questionIndex) => (
                             <div key={question.id} className={`border rounded p-4 ${question.isAIGenerated ? 'bg-gradient-hero border-accent/30' : 'bg-muted border-border'}`}>
@@ -861,7 +872,7 @@ const Generator = () => {
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </div>
-                              
+
                               <div className="space-y-4">
                                 {!question.isAIGenerated && (
                                   <div>
@@ -874,7 +885,7 @@ const Generator = () => {
                                     />
                                   </div>
                                 )}
-                                
+
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                   <div>
                                     <Label>Marks</Label>
@@ -885,7 +896,7 @@ const Generator = () => {
                                       min="1"
                                     />
                                   </div>
-                                  
+
                                   <div>
                                     <Label>Difficulty</Label>
                                     <Select
@@ -902,7 +913,7 @@ const Generator = () => {
                                       </SelectContent>
                                     </Select>
                                   </div>
-                                  
+
                                   <div>
                                     <Label>Unit</Label>
                                     <Select
@@ -919,7 +930,7 @@ const Generator = () => {
                                       </SelectContent>
                                     </Select>
                                   </div>
-                                  
+
                                   <div>
                                     <Label>Sub-questions</Label>
                                     <Input
@@ -935,7 +946,7 @@ const Generator = () => {
                                 {question.isAIGenerated && (
                                   <div className="bg-card p-3 rounded border border-accent/30">
                                     <p className="text-sm text-accent">
-                                      🎯 <strong>AI will generate:</strong> A {question.difficulty.toLowerCase()} level question from {question.unit} 
+                                      🎯 <strong>AI will generate:</strong> A {question.difficulty.toLowerCase()} level question from {question.unit}
                                       worth {question.marks} marks
                                       {question.subQuestionsCount > 0 && ` with ${question.subQuestionsCount} sub-questions`}
                                     </p>
@@ -954,10 +965,10 @@ const Generator = () => {
           </CardContent>
         </Card>
 
-        <div className="text-center pt-3">
-        <Button 
+        <div className="text-center">
+          <Button
             onClick={handleGenerate}
-            size="lg" 
+            size="lg"
             className="px-8 py-3 bg-gradient-primary hover:opacity-90 text-white"
             disabled={isGenerating}
           >
