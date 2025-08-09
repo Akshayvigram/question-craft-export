@@ -244,7 +244,8 @@
 
 
 
-import html2pdf from "html2pdf.js";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 
 
@@ -306,56 +307,6 @@ export const generateDocx  = (elementId: string, filename: string) => {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 };
-
-
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
-
-
-
-// export const generatePDF = async (elementId: string, filename: string): Promise<Blob | undefined> => {
-//   const element = document.getElementById(elementId);
-//   if (!element) {
-//     console.error(`Element with id "${elementId}" not found`);
-//     return;
-//   }
-
-//   const canvas = await html2canvas(element, {
-//     scale: 2,
-//     useCORS: true,
-//   });
-
-//   const imgData = canvas.toDataURL("image/jpeg", 0.98);
-//   const pdf = new jsPDF({
-//     unit: "in",
-//     format: "a4",
-//     orientation: "portrait",
-//   });
-
-//   const pageWidth = pdf.internal.pageSize.getWidth();
-//   const pageHeight = pdf.internal.pageSize.getHeight();
-
-//   const imgWidth = pageWidth;
-//   const imgHeight = (canvas.height * pageWidth) / canvas.width;
-
-//   let y = 0;
-//   pdf.addImage(imgData, "JPEG", 0, y, imgWidth, imgHeight);
-
-//   // If image is taller than one page, handle page breaks (optional)
-//   while (y + imgHeight > pageHeight) {
-//     y -= pageHeight;
-//     pdf.addPage();
-//     pdf.addImage(imgData, "JPEG", 0, y, imgWidth, imgHeight);
-//   }
-
-//   // Return as Blob
-//   return pdf.output("blob");
-// };
-
-
-
-
-
 
 export const generatePDF = async (elementId: string, filename: string): Promise<Blob | undefined> => {
   const element = document.getElementById(elementId);

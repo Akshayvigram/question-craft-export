@@ -54,8 +54,6 @@ const Result = () => {
     if (savedConfig) {
       try {
         const parsed = JSON.parse(savedConfig);
-        console.log("Loaded config from sessionStorage:", parsed);
-        console.log("First section questions:", parsed.sections?.[0]?.questions);
 
         const cleanedSections = parsed.sections?.map(section => ({
           ...section,
@@ -66,12 +64,7 @@ const Result = () => {
           ...parsed,
           sections: cleanedSections,
         });
-        // const delay = setTimeout(() => {
-        //   setUploading(true);
-        //   S3Upload(savedConfig, token);
-        // }, 1500);
-        // setUploading(false);
-        // return () => clearTimeout(delay);
+
 
         if (sholudUpload == "true") {
           const delay = setTimeout(()=> {

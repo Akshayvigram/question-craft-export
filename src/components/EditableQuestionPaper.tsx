@@ -36,10 +36,7 @@ const EditableQuestionPaper = ({ config, token, questions = [], onSave }: Editab
   const [editedConfig, setEditedConfig] = useState(config);
 
   const handleSave = async () => {
-    console.log(config);
-    
     await onSave(config.sections?.flatMap((section: any) => section.questions) || []);
-    // setEditedConfig(config);
     await S3Upload(editedConfig, token);
     setIsEditing(false);
     toast.success("Question paper updated successfully!");

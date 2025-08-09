@@ -17,13 +17,13 @@ const Index = () => {
   const [user, setUser] = useState<any>(null);
   const [userCredits, setUserCredits] = useState(100); // Mock credits data
   const navigate = useNavigate();
-const [recentPapers, setRecentPapers] = useState([]);
-const [loading, setLoading] = useState(true);
-const [error, setError] = useState("");
+  const [recentPapers, setRecentPapers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
 
-const storedUser = localStorage.getItem("user");
-const userEmail = storedUser ? JSON.parse(storedUser).email : null;
+  const storedUser = localStorage.getItem("user");
+  const userEmail = storedUser ? JSON.parse(storedUser).email : null;
 
   useEffect(() => {
     const checkAuthStatus = () => {
@@ -134,230 +134,230 @@ const userEmail = storedUser ? JSON.parse(storedUser).email : null;
   return (
     <div className="min-h-screen bg-gradient-hero">
       {/* Navigation */}
-<nav className="bg-card/90 backdrop-blur-md border-b border-border sticky top-0 z-50">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div className="flex items-center justify-between h-16">
+      <nav className="bg-card/90 backdrop-blur-md border-b border-border sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
 
-      {/* Logo */}
-      <ScrollLink to="hero" smooth={true} duration={800} offset={-70}>
-        <div className="flex items-center space-x-2 cursor-pointer">
-          <img
-            src="/vinathaal_icon.png"
-            alt="Vinathaal Icon"
-            className="w-14 h-14 object-contain"
-          />
-          <img
-            src="/vinathaal-heading-black.png"
-            alt="Vinathaal Heading"
-            className="h-[45px] w-30 object-contain"
-          />
-        </div>
-      </ScrollLink>
+            {/* Logo */}
+            <ScrollLink to="hero" smooth={true} duration={800} offset={-70}>
+              <div className="flex items-center space-x-2 cursor-pointer">
+                <img
+                  src="/vinathaal_icon.png"
+                  alt="Vinathaal Icon"
+                  className="w-14 h-14 object-contain"
+                />
+                <img
+                  src="/vinathaal-heading-black.png"
+                  alt="Vinathaal Heading"
+                  className="h-[45px] w-30 object-contain"
+                />
+              </div>
+            </ScrollLink>
 
-{/* Navigation Links */}
-<div className="hidden md:flex items-center space-x-8">
-  {!user ? (
-    <>
-      <Link
-        to="/pricing"
-        className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
-      >
-        Pricing
-      </Link>
+            {/* Navigation Links */}
+            <div className="hidden md:flex items-center space-x-8">
+              {!user ? (
+                <>
+                  <Link
+                    to="/pricing"
+                    className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
+                  >
+                    Pricing
+                  </Link>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          className="relative font-medium flex items-center space-x-1 text-muted-foreground hover:text-foreground transition-colors after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
-        >
-          <span>Generator</span>
-          <ChevronDown className="w-4 h-4" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-64 p-2 rounded-xl shadow-lg border border-border bg-popover"
-        >
-          <DropdownMenuItem asChild>
-            <Link
-              to="/mcq-generator"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gradient-primary text-sm transition-all text-foreground"
-            >
-              <Brain className="w-4 h-4" />
-              MCQ Generator
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link
-              to="/generator"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gradient-primary text-sm transition-all text-foreground"
-            >
-              <Upload className="w-4 h-4" />
-              Generator using Syllabus
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link
-              to="/generator"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gradient-primary text-sm transition-all text-foreground"
-            >
-              <FileText className="w-4 h-4" />
-              Generator using Question Bank
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      className="relative font-medium flex items-center space-x-1 text-muted-foreground hover:text-foreground transition-colors after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
+                    >
+                      <span>Generator</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-64 p-2 rounded-xl shadow-lg border border-border bg-popover"
+                    >
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to="/mcq-generator"
+                          className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gradient-primary text-sm transition-all text-foreground"
+                        >
+                          <Brain className="w-4 h-4" />
+                          MCQ Generator
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to="/generator"
+                          className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gradient-primary text-sm transition-all text-foreground"
+                        >
+                          <Upload className="w-4 h-4" />
+                          Generator using Syllabus
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to="/generator"
+                          className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gradient-primary text-sm transition-all text-foreground"
+                        >
+                          <FileText className="w-4 h-4" />
+                          Generator using Question Bank
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
-      <Link
-        to="/support"
-        className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
-      >
-        Support
-      </Link>
-    </>
-  ) : (
-    <>
-      <Link
-        to="/mcq-generator"
-        className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
-      >
-        MCQ Generator
-      </Link>
-      <Link
-        to="/generator?mode=syllabus"
-        className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
-      >
-        Syllabus Generator
-      </Link>
-      <Link
-        to="/generator?mode=questionbank"
-        className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
-      >
-        Question Bank Generator
-      </Link>
-    </>
-  )}
-</div>
-
-      {/* Profile Section */}
-<div className="flex items-center space-x-4">
-  {user ? (
-    <div className="flex items-center gap-4">
-      
-      <div className="text-right hidden md:block leading-tight">
-        <p className="text-sm text-muted-foreground">Hi,</p>
-        <p className="text-base font-semibold text-foreground">{user.name || user.email}</p>
-      </div>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <div className="relative w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-primary via-pink-500 to-yellow-400 hover:brightness-110 transition-shadow shadow-md cursor-pointer">
-            <div className="w-full h-full rounded-full overflow-hidden bg-background">
-              <img
-                src={user.profile || "profile.png"}
-                alt="Profile"
-                className="w-full h-full object-cover rounded-full"
-              />
+                  <Link
+                    to="/support"
+                    className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
+                  >
+                    Support
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/mcq-generator"
+                    className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
+                  >
+                    MCQ Generator
+                  </Link>
+                  <Link
+                    to="/generator?mode=syllabus"
+                    className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
+                  >
+                    Syllabus Generator
+                  </Link>
+                  <Link
+                    to="/generator?mode=questionbank"
+                    className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
+                  >
+                    Question Bank Generator
+                  </Link>
+                </>
+              )}
             </div>
+
+            {/* Profile Section */}
+            <div className="flex items-center space-x-4">
+              {user ? (
+                <div className="flex items-center gap-4">
+
+                  <div className="text-right hidden md:block leading-tight">
+                    <p className="text-sm text-muted-foreground">Hi,</p>
+                    <p className="text-base font-semibold text-foreground">{user.name || user.email}</p>
+                  </div>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div className="relative w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-primary via-pink-500 to-yellow-400 hover:brightness-110 transition-shadow shadow-md cursor-pointer">
+                        <div className="w-full h-full rounded-full overflow-hidden bg-background">
+                          <img
+                            src={user.profile || "profile.png"}
+                            alt="Profile"
+                            className="w-full h-full object-cover rounded-full"
+                          />
+                        </div>
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-[312px] mt-2 rounded-xl border border-border bg-white backdrop-blur-lg shadow-xl ring-1 ring-border right-0"
+                    >
+                      {/* Credits Display */}
+                      <div className="px-4 py-3 border-b border-border">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-full bg-yellow-500/10">
+                            <Coins className="w-5 h-5 text-yellow-500" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">Credits Remaining</p>
+                            <p className="text-lg font-bold text-yellow-600">{userCredits}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Create Community */}
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to="/create-community"
+                          className="group flex items-center gap-3 px-4 py-3 rounded-md w-full transition-all hover:bg-gradient-primary"
+                        >
+                          <div className="p-2 rounded-full bg-purple-500/10 group-hover:bg-white/20 transition">
+                            <Users className="w-5 h-5 text-purple-500 group-hover:text-white" />
+                          </div>
+                          <span className="text-sm font-medium text-foreground group-hover:text-white transition">
+                            Create Community
+                          </span>
+                        </Link>
+                      </DropdownMenuItem>
+
+                      <DropdownMenuSeparator />
+
+                      {/* Get More Credits */}
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to="/pricing"
+                          className="group flex items-center gap-3 px-4 py-3 rounded-md w-full transition-all hover:bg-gradient-primary"
+                        >
+                          <div className="p-2 rounded-full bg-primary/10 group-hover:bg-white/20 transition">
+                            <Wallet className="w-5 h-5 text-primary group-hover:text-white" />
+                          </div>
+                          <span className="text-sm font-medium text-foreground group-hover:text-white transition">
+                            Get More Credits
+                          </span>
+                        </Link>
+                      </DropdownMenuItem>
+
+                      {/* Support */}
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to="/support"
+                          className="group flex items-center gap-3 px-4 py-3 rounded-md w-full transition-all hover:bg-gradient-primary"
+                        >
+                          <div className="p-2 rounded-full bg-blue-500/10 group-hover:bg-white/20 transition">
+                            <HelpCircle className="w-5 h-5 text-blue-500 group-hover:text-white" />
+                          </div>
+                          <span className="text-sm font-medium text-foreground group-hover:text-white transition">
+                            Support
+                          </span>
+                        </Link>
+                      </DropdownMenuItem>
+
+                      {/* Logout */}
+                      <DropdownMenuItem
+                        onClick={handleLogout}
+                        className="group flex items-center gap-3 px-4 py-3 rounded-md w-full cursor-pointer transition-all hover:bg-gradient-primary"
+                      >
+                        <div className="p-2 rounded-full bg-red-500/10 group-hover:bg-white/20 transition">
+                          <LogOut className="w-5 h-5 text-red-500 group-hover:text-white" />
+                        </div>
+                        <span className="text-sm font-medium text-red-500 group-hover:text-white transition">
+                          Log Out
+                        </span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+
+                  </DropdownMenu>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-4">
+                  <Link to="/login">
+                    <Button variant="outline" className="px-8 py-3 hover:bg-gradient-primary hover:text-white transition-all">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link to="/signup">
+                    <Button className="px-8 py-3 bg-gradient-primary hover:brightness-110 transition-all">
+                      Sign Up
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+
           </div>
-        </DropdownMenuTrigger>
-<DropdownMenuContent
-  align="end"
-  className="w-[312px] mt-2 rounded-xl border border-border bg-white backdrop-blur-lg shadow-xl ring-1 ring-border right-0"
->
-  {/* Credits Display */}
-  <div className="px-4 py-3 border-b border-border">
-    <div className="flex items-center gap-3">
-      <div className="p-2 rounded-full bg-yellow-500/10">
-        <Coins className="w-5 h-5 text-yellow-500" />
-      </div>
-      <div>
-        <p className="text-sm font-medium text-foreground">Credits Remaining</p>
-        <p className="text-lg font-bold text-yellow-600">{userCredits}</p>
-      </div>
-    </div>
-  </div>
-
-  {/* Create Community */}
-  <DropdownMenuItem asChild>
-    <Link
-      to="/create-community"
-      className="group flex items-center gap-3 px-4 py-3 rounded-md w-full transition-all hover:bg-gradient-primary"
-    >
-      <div className="p-2 rounded-full bg-purple-500/10 group-hover:bg-white/20 transition">
-        <Users className="w-5 h-5 text-purple-500 group-hover:text-white" />
-      </div>
-      <span className="text-sm font-medium text-foreground group-hover:text-white transition">
-        Create Community
-      </span>
-    </Link>
-  </DropdownMenuItem>
-
-  <DropdownMenuSeparator />
-
-  {/* Get More Credits */}
-  <DropdownMenuItem asChild>
-    <Link
-      to="/pricing"
-      className="group flex items-center gap-3 px-4 py-3 rounded-md w-full transition-all hover:bg-gradient-primary"
-    >
-      <div className="p-2 rounded-full bg-primary/10 group-hover:bg-white/20 transition">
-        <Wallet className="w-5 h-5 text-primary group-hover:text-white" />
-      </div>
-      <span className="text-sm font-medium text-foreground group-hover:text-white transition">
-        Get More Credits
-      </span>
-    </Link>
-  </DropdownMenuItem>
-
-  {/* Support */}
-  <DropdownMenuItem asChild>
-    <Link
-      to="/support"
-      className="group flex items-center gap-3 px-4 py-3 rounded-md w-full transition-all hover:bg-gradient-primary"
-    >
-      <div className="p-2 rounded-full bg-blue-500/10 group-hover:bg-white/20 transition">
-        <HelpCircle className="w-5 h-5 text-blue-500 group-hover:text-white" />
-      </div>
-      <span className="text-sm font-medium text-foreground group-hover:text-white transition">
-        Support
-      </span>
-    </Link>
-  </DropdownMenuItem>
-
-  {/* Logout */}
-  <DropdownMenuItem
-    onClick={handleLogout}
-    className="group flex items-center gap-3 px-4 py-3 rounded-md w-full cursor-pointer transition-all hover:bg-gradient-primary"
-  >
-    <div className="p-2 rounded-full bg-red-500/10 group-hover:bg-white/20 transition">
-      <LogOut className="w-5 h-5 text-red-500 group-hover:text-white" />
-    </div>
-    <span className="text-sm font-medium text-red-500 group-hover:text-white transition">
-      Log Out
-    </span>
-  </DropdownMenuItem>
-</DropdownMenuContent>
-
-      </DropdownMenu>
-    </div>
-  ) : (
-    <div className="flex items-center space-x-4">
-      <Link to="/login">
-        <Button variant="outline" className="px-8 py-3 hover:bg-gradient-primary hover:text-white transition-all">
-          Login
-        </Button>
-      </Link>
-      <Link to="/signup">
-        <Button className="px-8 py-3 bg-gradient-primary hover:brightness-110 transition-all">
-          Sign Up
-        </Button>
-      </Link>
-    </div>
-  )}
-</div>
-
-    </div>
-  </div>
-</nav>
+        </div>
+      </nav>
 
       {/* Hero Section - Always shown */}
       <section
@@ -371,12 +371,12 @@ const userEmail = storedUser ? JSON.parse(storedUser).email : null;
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-<h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
-  Generate Question Papers with{" "}
-  <span className="inline-block overflow-hidden whitespace-nowrap bg-gradient-primary bg-clip-text text-transparent">
-    AI Precision
-  </span>
-</h1>
+          <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
+            Generate Question Papers with{" "}
+            <span className="inline-block overflow-hidden whitespace-nowrap bg-gradient-primary bg-clip-text text-transparent">
+              AI Precision
+            </span>
+          </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
             Create professional question papers instantly with customizable sections, difficulty levels,
             and automated answer keys. Perfect for educators and institutions.
@@ -394,69 +394,60 @@ const userEmail = storedUser ? JSON.parse(storedUser).email : null;
         </div>
       </section>
 
-{user && (
-  <section className="py-20 bg-background">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {user && (
+        <section className="py-20 bg-background">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-      {recentPapers.length > 0 && (
-        <>
-        {/* Title */}
-      <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold text-foreground mb-2">Your Recently Created Papers</h2>
-        <p className="text-muted-foreground text-lg">
-          Continue editing or reviewing your previously generated question papers.
-        </p>
-      </div>
-
-      {/* Paper Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {recentPapers.map((paper) => (
-          <Card
-            key={paper.id}
-            className="relative group p-6 border border-border rounded-2xl shadow-sm hover:shadow-xl transition-shadow bg-card cursor-pointer"
-          >
-            {/* Header */}
-            <div className="mb-4">
-              <CardTitle className="text-xl font-semibold text-primary group-hover:underline">
-                {paper.subject}
-              </CardTitle>
-              {/* <CardDescription className="text-muted-foreground">{paper.university}</CardDescription> */}
-            </div>
-
-            {/* Details */}
-            <CardContent className="space-y-4 text-sm text-muted-foreground">
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  {/* <span className="flex items-center gap-1">
-                    📝 Marks:{" "}
-                    <span className="font-medium text-foreground">{paper.marks}</span>
-                  </span> */}
-                  {/* <span className="flex items-center gap-1">
-                    📚 Sections:{" "}
-                    <span className="font-medium text-foreground">{paper.sections}</span>
-                  </span> */}
+            {recentPapers.length > 0 && (
+              <>
+                {/* Title */}
+                <div className="text-center mb-12">
+                  <h2 className="text-3xl font-bold text-foreground mb-2">Your Recently Created Papers</h2>
+                  <p className="text-muted-foreground text-lg">
+                    Continue editing or reviewing your previously generated question papers.
+                  </p>
                 </div>
-                <div className="text-xs text-muted-foreground/80">
-                  📅 Created: {new Date(paper.date).toLocaleDateString()}
-                </div>
-              </div>
 
-              {/* View Button */}
-              <Button
-                variant="outline"
-                className="px-8 py-3 w-full hover:bg-gradient-primary transition-all"
-                onClick={ ()=> window.open(paper.objectUrl, "_blank")}
-              >
-                View Paper
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div></>
+                {/* Paper Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {recentPapers.map((paper) => (
+                    <Card
+                      key={paper.id}
+                      className="relative group p-6 border border-border rounded-2xl shadow-sm hover:shadow-xl transition-shadow bg-card cursor-pointer"
+                    >
+                      {/* Header */}
+                      <div className="mb-4">
+                        <CardTitle className="text-xl font-semibold text-primary group-hover:underline">
+                          {paper.subject}
+                        </CardTitle>
+                      </div>
+
+                      {/* Details */}
+                      <CardContent className="space-y-4 text-sm text-muted-foreground">
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center justify-between">
+                          </div>
+                          <div className="text-xs text-muted-foreground/80">
+                            📅 Created: {new Date(paper.date).toLocaleDateString()}
+                          </div>
+                        </div>
+
+                        {/* View Button */}
+                        <Button
+                          variant="outline"
+                          className="px-8 py-3 w-full hover:bg-gradient-primary transition-all"
+                          onClick={() => window.open(paper.objectUrl, "_blank")}
+                        >
+                          View Paper
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div></>
+            )}
+          </div>
+        </section>
       )}
-    </div>
-  </section>
-)}
 
       {/* Dashboard Stats Section - Only show when NOT logged in */}
       {!user && <DashboardStats />}
@@ -472,35 +463,35 @@ const userEmail = storedUser ? JSON.parse(storedUser).email : null;
             <p className="text-xl text-muted-foreground">Select a template to begin creating your question paper</p>
           </div>
 
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-100 gap-y-6">
-  {[
-    { preview: "question-paper.jpg" },
-    { preview: "question-paper1.jpg" },
-    { preview: "question-paper.jpg" },
-    { preview: "question-paper1.jpg" },
-    { preview: "question-paper.jpg" },
-    { preview: "question-paper1.jpg" },
-  ].map((template, index) => (
-    <div key={index} className="flex flex-col items-center">
-      <div className="w-full max-w-[300px] group transition-transform duration-300 hover:scale-105">
-        <div className="relative w-full h-[340px] rounded-xl overflow-hidden border border-border/100 transition-all duration-300 bg-white/10 dark:bg-slate-800/20 backdrop-blur-md">
-          <img
-            src={template.preview}
-            alt="Template Preview"
-            className="w-full h-full object-cover object-top rounded-xl"
-          />
-        </div>
-      </div>
-      <Button 
-        size="sm" 
-        className="mt-4 px-6 py-2 bg-gradient-primary hover:opacity-90"
-        onClick={() => handleGeneratorClick("/generator")}
-      >
-        Choose Template
-      </Button>
-    </div>
-  ))}
-</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-100 gap-y-6">
+            {[
+              { preview: "question-paper.jpg" },
+              { preview: "question-paper1.jpg" },
+              { preview: "question-paper.jpg" },
+              { preview: "question-paper1.jpg" },
+              { preview: "question-paper.jpg" },
+              { preview: "question-paper1.jpg" },
+            ].map((template, index) => (
+              <div key={index} className="flex flex-col items-center">
+                <div className="w-full max-w-[300px] group transition-transform duration-300 hover:scale-105">
+                  <div className="relative w-full h-[340px] rounded-xl overflow-hidden border border-border/100 transition-all duration-300 bg-white/10 dark:bg-slate-800/20 backdrop-blur-md">
+                    <img
+                      src={template.preview}
+                      alt="Template Preview"
+                      className="w-full h-full object-cover object-top rounded-xl"
+                    />
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  className="mt-4 px-6 py-2 bg-gradient-primary hover:opacity-90"
+                  onClick={() => handleGeneratorClick("/generator")}
+                >
+                  Choose Template
+                </Button>
+              </div>
+            ))}
+          </div>
 
           {/* View All Templates Button */}
           <div className="text-center mt-12">
