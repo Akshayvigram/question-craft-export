@@ -15,7 +15,7 @@ import Support from './pages/Support';
 import Templates from './pages/Templates';
 import CreateCommunity from './pages/CreateCommunity';
 import NotFound from './pages/NotFound';
-import { Toaster } from 'sonner';
+import { Toaster } from "@/components/ui/toaster";
 import './App.css';
 
 function App() {
@@ -38,6 +38,7 @@ function App() {
           <Route path="/templates" element={<Templates />} />
           <Route path="/create-community" element={<CreateCommunity />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/toaster" element={< Toaster/>}/>
         </Routes>
       </div>
       <Toaster />
