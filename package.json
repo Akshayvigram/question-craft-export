@@ -69,7 +69,6 @@
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
-    "uuid": "^11.1.0",
     "vaul": "^0.9.3",
     "zod": "^3.23.8"
   },
@@ -91,18 +90,5 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1"
-  },
-  "description": "**URL**: https://lovable.dev/projects/c9155472-94b9-4b10-a7bf-7f145e579c74",
-  "main": "eslint.config.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Bose14/question-craft-export.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Bose14/question-craft-export/issues"
-  },
-  "homepage": "https://github.com/Bose14/question-craft-export#readme"
+  }
 }

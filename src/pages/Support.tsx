@@ -180,23 +180,21 @@ const Support = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      <nav className="bg-white border-b border-slate-200 shadow-sm">
+      <nav className="bg-background border-b border-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center space-x-2 text-slate-900 hover:text-slate-700">
+            <Link to="/" className="flex items-center space-x-2 text-foreground hover:text-muted-foreground">
               <ArrowLeft className="w-5 h-5" />
               <span>Back to Home</span>
             </Link>
             <div className="flex items-center space-x-2">
-              <img
-                src="/vinathaal%20logo.png"
-                alt="Vinathaal Logo"
-                className="h-16 w-auto object-contain"
-              />
+              <FileText className="w-8 h-8 text-primary" />
+              <span className="text-xl font-bold text-primary">Vinathaal</span>
             </div>
           </div>
         </div>
       </nav>
+
       <section className="py-20">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h1 className="text-5xl font-bold text-foreground mb-6">
