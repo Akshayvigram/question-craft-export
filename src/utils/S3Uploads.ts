@@ -6,6 +6,7 @@ import { generatePDF } from "./pdfGenerator"
 
 // const [uploding, setUploading] = useState(false);
 export const S3Upload = async (config, token) => {
+    const api_token = localStorage.getItem("apiToken");
     try {
 
         // console.log(config);
@@ -40,7 +41,10 @@ export const S3Upload = async (config, token) => {
 
         // const response = await axios.get(`https://vinathaal.azhizen.com/api/get-upload-url`, {
         const response = await axios.get(`https://vinathaal.azhizen.com/api/get-upload-url`, {
-            params: payload
+            params: payload,
+            headers: {
+                'Authorization': `Bearer ${api_token}`
+            }
         });
 
         const uploadUrl = response.data.uploadURL;
@@ -58,8 +62,6 @@ export const S3Upload = async (config, token) => {
 
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const email = user?.email;
-        // const timestamp = new Date().toISOString();
-        alert('✅ File uploaded to S3 successfully!' + file.name);
 
         const istoffset = 5.5 * 60 * 60 * 1000;
         const isTime = new Date(now.getTime() + istoffset);
@@ -76,22 +78,24 @@ export const S3Upload = async (config, token) => {
         
 
         await axios.post("https://vinathaal.azhizen.com/api/store-upload-metadata", {
-            email,
-            uploadURL: uploadUrl,
-            objectURL: ObjectUrl,
-            subjectName: subjectName,
-            dateTime,
-        })
-        .then(res => {
-            alert(res.data.message);
-        })
-
-
+        email,
+        uploadURL: uploadUrl,
+        objectURL: ObjectUrl,
+        subjectName: subjectName,
+        dateTime,
+    }, {
+        headers: {
+            'Authorization': `Bearer ${api_token}`
+        }
+    })
+    .then(res => {
+        console.log(res.data.message);
+    })
+    .catch(err => {
+        console.error('❌ Error storing upload metadata:', err);
+    });
 
     } catch (err) {
         console.error('❌ Upload failed:', err);
-        alert('Failed to upload file');
     }
-
-    alert('File Generated Succesfully');
 } 

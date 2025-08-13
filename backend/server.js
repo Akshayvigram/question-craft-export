@@ -17,6 +17,7 @@ const supportRoute = require('./routes/support'); // Support router factory
 const slackAlertRoute = require('./routes/slack'); // Slack alert router factory
 const userRoutes = require('./routes/user'); // User management router factory
 const s3Upload = require('./routes/s3Upload');
+const createTokenAuthMiddleware = require('./utils/middleware'); 
 
 /**
  * Main function to initialize services and start the Express server.
@@ -32,7 +33,7 @@ async function startServer() {
     // Create dependencies that rely on the loaded configuration.
     const db = createDbPool(config);
     const transporter = createTransporter(config);
-
+    const protect = createTokenAuthMiddleware(db);
     // 3. CREATE EXPRESS APP
     const app = express();
 
@@ -52,8 +53,16 @@ async function startServer() {
 
     const perplexityService = createPerplexityService(config);
 
+    //api's which doesn't require authorization
     app.use('/api/auth', authRoutes(db, transporter, config));
     app.use('/api', statsRoutes(db, config));
+    app.get('/health', (req, res) => {
+      res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+    });
+    
+    // 5. PROTECT ROUTES THAT REQUIRE AUTHORIZATION
+
+    app.use(protect);
     app.use('/api', extractRoute);
     app.use('/api', generateRoute(perplexityService));
     app.use('/api', answerKeyRoute(perplexityService));
@@ -63,9 +72,6 @@ async function startServer() {
     app.use('/api', s3Upload(config, db));
     
     // --- System Routes ---
-    app.get('/health', (req, res) => {
-      res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
-    });
     
     // 6. SET UP FINAL ERROR HANDLING MIDDLEWARE
     // This should be the last middleware you use.

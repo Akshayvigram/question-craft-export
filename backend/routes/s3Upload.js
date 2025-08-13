@@ -44,14 +44,6 @@ module.exports = function S3Upload(config, db) {
     router.post('/store-upload-metadata', async (req, res) => {
         const { email, uploadURL, objectURL, dateTime, subjectName } = req.body;
 
-        console.log("Received Data: ", {
-            email,
-            objectURL,
-            dateTime,
-            subjectName
-        });
-
-
         if (!email || !objectURL || !dateTime || !subjectName) {
             return res.status(400).json({ message: 'Missing field' });
         }
