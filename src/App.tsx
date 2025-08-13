@@ -13,7 +13,6 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Support from './pages/Support';
 import Templates from './pages/Templates';
-import Profile from './pages/Profile';
 import CreateCommunity from './pages/CreateCommunity';
 import NotFound from './pages/NotFound';
 import { Toaster } from 'sonner';
@@ -38,7 +37,6 @@ function App() {
           <Route path="/support" element={<Support />} />
           <Route path="/templates" element={<Templates />} />
           <Route path="/create-community" element={<CreateCommunity />} />
-          <Route path="/profile" element={<Profile />} /> 
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
