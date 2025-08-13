@@ -97,7 +97,7 @@ const Support = () => {
 const onSubmit = async (data: ContactFormData) => {
   setIsSubmitting(true);
   try {
-    const response = await fetch("http://localhost:3001/api/support", {
+    const response = await fetch("https://vinathaal.azhizen.com/api/support", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -106,7 +106,7 @@ const onSubmit = async (data: ContactFormData) => {
 
     if (!response.ok) throw new Error("Support API failed");
 
-    const slackResponse = await fetch("http://localhost:3001/api/slack-alert", {
+    const slackResponse = await fetch("https://vinathaal.azhizen.com/api/slack-alert", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
