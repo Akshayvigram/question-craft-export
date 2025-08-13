@@ -56,6 +56,7 @@ interface Section {
 
 const Generator = () => {
   const navigate = useNavigate();
+  const api_token = localStorage.getItem('apiToken');
 
   // Check authentication on component mount
   useEffect(() => {
@@ -122,6 +123,9 @@ const Generator = () => {
     try {
       const res = await fetch("https://vinathaal.azhizen.com/api/extract-syllabus", {
         method: "POST",
+        headers: {
+          'Authorization': `Bearer ${api_token}` 
+        },
         body: formData,
       });
 
@@ -435,8 +439,7 @@ const Generator = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // You might need to include an auth token here
-          // 'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          'Authorization': `Bearer ${api_token}`
         },
         body: JSON.stringify(payload),
       });

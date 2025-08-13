@@ -2,6 +2,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const generateIdToken = require('../utils/idtoken_generator');
 
 // This exports a "factory" function.
 // It creates the router once it receives its dependencies (db, transporter, config).
@@ -57,7 +58,9 @@ module.exports = function(db, transporter, config) {
       }
 
       const passwordHash = await bcrypt.hash(password, 10);
-      await db.query('INSERT INTO users SET ?', { name, email, password_hash: passwordHash, role: 'user' });
+      const idtoken = generateIdToken('USER', 10);
+      const api_token = generateIdToken('vina_', 16);
+      await db.query('INSERT INTO users SET ?', {id_token: idtoken, name, email, password_hash: passwordHash, role: 'user', api_token: api_token });
 
       res.status(201).json({ message: 'User registered successfully.' });
     } catch (error) {
@@ -90,6 +93,7 @@ module.exports = function(db, transporter, config) {
           name: user.name,
           email: user.email,
           role: user.role,
+          api_token: user.api_token_hash,
         },
       });
     } catch (error) {

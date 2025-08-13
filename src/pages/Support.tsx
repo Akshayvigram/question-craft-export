@@ -58,7 +58,7 @@ const Support = () => {
   const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-
+  const api_token = sessionStorage.getItem("token");
   // Get user data from localStorage if logged in
   const getUserData = () => {
     try {
@@ -99,7 +99,9 @@ const onSubmit = async (data: ContactFormData) => {
   try {
     const response = await fetch("https://vinathaal.azhizen.com/api/support", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json",
+        "Authorization": `Bearer ${api_token}`
+      },
       body: JSON.stringify(data),
     });
 
@@ -108,7 +110,10 @@ const onSubmit = async (data: ContactFormData) => {
 
     const slackResponse = await fetch("https://vinathaal.azhizen.com/api/slack-alert", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${api_token}`
+       },
       body: JSON.stringify({
         fullName: data.fullName,
         email: data.email,

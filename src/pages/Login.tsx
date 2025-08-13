@@ -42,10 +42,12 @@ const Login = () => {
           email: email,
           token: data.token || "demo-token-" + Date.now(),
           loginTime: new Date().toISOString(),
+          api_token: data.user?.api_token,
         };
         
         localStorage.setItem("user", JSON.stringify(userData));
         localStorage.setItem("authToken", userData.token);
+        localStorage.setItem("apiToken", userData.api_token);
 
         const redirectPath = sessionStorage.getItem("redirectAfterLogin");
         if (redirectPath) {

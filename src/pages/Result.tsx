@@ -37,6 +37,7 @@ interface AnswerItem {
 
 const Result = () => {
   const navigate = useNavigate();
+  const api_token = localStorage.getItem("apiToken");
   const [config, setConfig] = useState<QuestionPaperConfig | null>(null);
   const [showAnswerKey, setShowAnswerKey] = useState(false);
   const [answerKey, setAnswerKey] = useState<AnswerItem[]>([]);
@@ -128,6 +129,7 @@ const Result = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${api_token}`,
         },
         body: JSON.stringify({
           questionPaper: {
