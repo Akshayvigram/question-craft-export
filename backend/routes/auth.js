@@ -78,7 +78,7 @@ module.exports = function(db, transporter, config) {
       if (!rows || rows.length === 0) {
         return res.status(401).json({ message: 'Invalid credentials.' });
       }
-      const user = rows[0];
+      const user = rows;
       const isMatch = await bcrypt.compare(password, user.password_hash);
       if (!isMatch) {
         return res.status(401).json({ message: 'Invalid credentials.' });
