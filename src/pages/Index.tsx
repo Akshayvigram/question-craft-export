@@ -14,7 +14,8 @@ import { HelpCircle, Wallet } from "lucide-react";
 import axios from "axios";
 
 const Index = () => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState(null);
+  const [profilePicture, setProfilePicture] = useState(null); // New state to hold profile picture
   const [userCredits, setUserCredits] = useState(100); // Mock credits data
   const navigate = useNavigate();
   const [recentPapers, setRecentPapers] = useState([]);
@@ -25,24 +26,38 @@ const Index = () => {
   const storedUser = localStorage.getItem("user");
   const userEmail = storedUser ? JSON.parse(storedUser).email : null;
 
+  // Extract first letter from the user's name (if available)
+  const userInitial = user?.name?.trim() ? user.name.trim()[0].toUpperCase() : "U";
+
   useEffect(() => {
     const checkAuthStatus = () => {
       const userData = localStorage.getItem("user"); // storedUser
       const authToken = localStorage.getItem("authToken");
 
       if (userData && authToken) {
-        setUser(JSON.parse(userData));
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        
+        // Retrieve profile picture using a unique key for the user
+        const savedProfilePic = localStorage.getItem(`profilePicture_${parsedUser.email}`);
+        if (savedProfilePic) {
+          setProfilePicture(savedProfilePic);
+        } else {
+          setProfilePicture(null);
+        }
+
         // Mock credits fetch - in real app this would come from backend
         setUserCredits(100);
       } else {
         setUser(null);
+        setProfilePicture(null); // Clear profile picture on logout
       }
     };
 
     checkAuthStatus();
 
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "user" || e.key === "authToken") {
+    const handleStorageChange = (e) => {
+      if (e.key === "user" || e.key === "authToken" || e.key?.startsWith("profilePicture_")) {
         checkAuthStatus();
       }
     };
@@ -54,12 +69,14 @@ const Index = () => {
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
+    // We don't need to remove the profile picture here, as it's user-specific and can be reloaded on login.
     setUser(null);
+    setProfilePicture(null);
     toast.success("Logged out successfully");
     navigate("/");
   };
 
-  const handleGeneratorClick = (path: string) => {
+  const handleGeneratorClick = (path) => {
     const authToken = localStorage.getItem("authToken");
     const userData = localStorage.getItem("user");
 
