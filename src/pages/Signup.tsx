@@ -1,12 +1,15 @@
 
 import { useState } from "react";
-import { Link , useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { LoginSocialGoogle } from 'reactjs-social-login';
+
+import { FcGoogle } from "react-icons/fc";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -49,7 +52,7 @@ const Signup = () => {
 
       if (res.ok) {
         toast.success("Account created successfully! Welcome to QuestionCraft.");
-        
+
         // Store user data consistently
         const userData = {
           name: formData.name,
@@ -57,11 +60,16 @@ const Signup = () => {
           token: "demo-token-" + Date.now(),
           loginTime: new Date().toISOString(),
         };
-        
+
         localStorage.setItem("user", JSON.stringify(userData));
         localStorage.setItem("authToken", userData.token);
-        
-        navigate("/");
+
+        setTimeout(() => {
+        const redirectPath = sessionStorage.getItem("redirectAfterSignup");
+        sessionStorage.removeItem("redirectAfterSignup");
+        navigate(redirectPath || "/");
+      }, 200);
+
       } else {
         toast.error(data.message || "Signup failed. Please try again.");
       }
@@ -88,11 +96,11 @@ const Signup = () => {
             to="/"
             className="inline-flex items-center space-x-2 text-primary hover:text-accent transition-colors"
           >
-        <img
-          src="/vinathaal_icon.png"
-          alt="Vinathaal Icon"
-          className="w-14 h-14 object-contain"
-        /> 
+            <img
+              src="/vinathaal_icon.png"
+              alt="Vinathaal Icon"
+              className="w-14 h-14 object-contain"
+            />
             <span className="text-2xl font-semibold">Vinathaal</span>
           </Link>
           <Link
@@ -175,12 +183,83 @@ const Signup = () => {
                 >
                   Sign in
                 </Link>
+
               </p>
             </div>
+            {/* Google Sign-In */}
+            <div className="mt-6">
+              <div className="flex justify-center"></div>
+
+              <LoginSocialGoogle
+                client_id="961571231420-2vc0uud6mp86tmg6649htncnenh32tll.apps.googleusercontent.com"
+                onResolve={async ({ data }) => {
+                  try {
+                    const token = data.id_token; // ✅ Use id_token instead of access_token
+                    if (!token) {
+                      toast.error("No Google ID token received");
+                      return;
+                    }
+
+                    setIsLoading(true);
+
+                    const res = await fetch("http://localhost:3001/api/auth/google-signup", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ token }),
+                    });
+
+                    const responseData = await res.json();
+
+                    if (res.ok && responseData.token) {
+                      toast.success("Google Sign-Up successful!");
+                      const userData = {
+                        name: responseData.user?.name,
+                        email: responseData.user?.email,
+                        picture: responseData.user?.picture,
+                        token: responseData.token,
+                        signupTime: new Date().toISOString(),
+                        googleId: responseData.user?.googleId,
+                      };
+                      localStorage.setItem("user", JSON.stringify(userData));
+                      localStorage.setItem("authToken", responseData.token);
+
+                      const redirectPath = sessionStorage.getItem("redirectAfterSignup");
+                      if (redirectPath) {
+                        sessionStorage.removeItem("redirectAfterSignup");
+                        navigate(redirectPath);
+                      } else {
+                        navigate("/");
+                      }
+                    } else {
+                      toast.error(responseData.error || "Google signup failed");
+                    }
+                  } catch (err) {
+                    console.error("Google Sign-Up error:", err);
+                    toast.error("Google Sign-Up failed");
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }}
+                onReject={(err) => {
+                  toast.error("Google Sign-Up failed");
+                  console.error(err);
+                }}
+              >
+                <button className="flex items-center gap-3 bg-white border px-6 py-2 rounded-lg shadow hover:shadow-lg transition-shadow">
+                  <FcGoogle size={24} />
+                  <span className="text-gray-700">Sign up with Google</span>
+                </button>
+              </LoginSocialGoogle>
+
+
+
+            </div>
+
+
           </CardContent>
         </Card>
       </div>
-    </div>
+    </div >
   );
 };
 

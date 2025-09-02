@@ -8,13 +8,26 @@ import { toast } from "sonner";
 import AnswerKeyGenerator from "@/components/AnswerKeyGenerator";
 import ShareDialog from "@/components/ShareDialog";
 import EditableQuestionPaper from "@/components/EditableQuestionPaper";
-import { generatePDF, generateDocx } from "@/utils/pdfGenerator";
+import { generatePDF } from "@/utils/pdfGenerator";
 import { S3Upload } from "@/utils/S3Uploads";
 import axios from 'axios'
 // import { Blob } from "buffer";
 // import { generateWordDocument } from "@/utils/pdfGenerator";
 import html2pdf from 'html2pdf.js';
 import { URL } from "url";
+import {
+  Document,
+  Packer,
+  Paragraph,
+  TextRun,
+  AlignmentType,
+  ImageRun,
+  Header,
+  Tab,
+  TabStopType,
+  TabStopPosition,
+} from "docx";
+import { saveAs } from "file-saver";
 
 interface QuestionPaperConfig {
   subjectName: string;
@@ -103,11 +116,227 @@ const Result = () => {
     }
   };
 
-  const handleWordGenerate = () => {
-    const filename = config?.subjectName || 'question-paper';
-    generateDocx('question-paper-content', filename);
-    toast.success("Word document downloaded successfully!");
-  };
+  
+const handleWordGenerate = async () => {
+    if (!config) {
+        toast.error("No configuration available for document generation.");
+        return;
+    }
+
+    const filename = config.subjectName || "question-paper";
+    const children: Paragraph[] = [];
+
+    // Utility: fetch image and convert to ArrayBuffer
+    const urlToArrayBuffer = async (url: string) => {
+        try {
+            // Validate URL using browser's native URL constructor
+            const validUrl = new window.URL(url, window.location.origin);
+            console.log("Fetching image from:", validUrl.href);
+            const response = await fetch(url, { mode: 'cors' });
+            if (!response.ok) {
+                throw new Error(`Failed to fetch image: ${response.statusText}`);
+            }
+            const contentType = response.headers.get('content-type');
+            if (!contentType?.includes('image/png') && !contentType?.includes('image/jpeg')) {
+                throw new Error('Unsupported image format. Only PNG and JPEG are supported.');
+            }
+            const arrayBuffer = await response.arrayBuffer();
+            if (arrayBuffer.byteLength === 0) {
+                throw new Error('Fetched image data is empty.');
+            }
+            console.log("Image fetched successfully, size:", arrayBuffer.byteLength);
+            return arrayBuffer;
+        } catch (error) {
+            console.error("Error fetching image:", error);
+            toast.error("Failed to load header image. Generating document without image.");
+            return null;
+        }
+    };
+
+    // Get the header image data as an ArrayBuffer
+    console.log("Header Image URL:", config.headerImage);
+    const headerImageData = config.headerImage
+        ? await urlToArrayBuffer(config.headerImage)
+        : null;
+    console.log("Header Image Data:", headerImageData ? `ArrayBuffer (${headerImageData.byteLength} bytes)` : 'null');
+
+    // Build the main document content
+    children.push(
+        new Paragraph({
+            children: [
+                new TextRun({
+                    text: "Question Paper",
+                    bold: true,
+                    size: 32,
+                }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 200 },
+        })
+    );
+
+    children.push(
+        new Paragraph({
+            children: [
+                new TextRun({
+                    text: config.subjectName,
+                    bold: true,
+                    size: 28,
+                }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 400 },
+        })
+    );
+
+    children.push(
+        new Paragraph({
+            tabStops: [
+                {
+                    type: TabStopType.CENTER,
+                    position: 4680,
+                },
+                {
+                    type: TabStopType.RIGHT,
+                    position: TabStopPosition.MAX,
+                },
+            ],
+            spacing: { after: 400 },
+            children: [
+                new TextRun({
+                    text: `Date: ${config.examDate || "________"}`,
+                    size: 24,
+                }),
+                new TextRun({ children: [new Tab()] }),
+                new TextRun({
+                    text: `Duration: ${config.duration || "________"}`,
+                    size: 24,
+                }),
+                new TextRun({ children: [new Tab()] }),
+                new TextRun({
+                    text: `Total Marks: ${config.totalMarks || "________"}`,
+                    size: 24,
+                }),
+            ],
+        })
+    );
+
+    config.sections.forEach((section, sIndex) => {
+        children.push(
+            new Paragraph({
+                children: [
+                    new TextRun({
+                        text: section.name,
+                        bold: true,
+                        size: 28,
+                    }),
+                ],
+                alignment: AlignmentType.CENTER,
+                spacing: { after: 200 },
+            })
+        );
+        section.questions.forEach((q: any, qIndex: number) => {
+            children.push(
+                new Paragraph({
+                    children: [
+                        new TextRun({
+                            text: `${qIndex + 1}. ${q.text || q.question}`,
+                            size: 24,
+                        }),
+                    ],
+                    alignment: AlignmentType.LEFT,
+                })
+            );
+            children.push(
+                new Paragraph({
+                    children: [
+                        new TextRun({
+                            text: `[${q.marks} Marks]`,
+                            size: 22,
+                            bold: true,
+                        }),
+                    ],
+                    alignment: AlignmentType.RIGHT,
+                    spacing: { after: 200 },
+                })
+            );
+        });
+    });
+
+    children.push(
+        new Paragraph({
+            children: [
+                new TextRun({
+                    text: "Generated using AI Question Paper Generator",
+                    italics: true,
+                    size: 20,
+                }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 600 },
+        })
+    );
+
+    // Build the Word document
+    const doc = new Document({
+        sections: [
+            {
+                properties: {
+                    page: {
+                        margin: {
+                            top: "1in",
+                            right: "1in",
+                            bottom: "1in",
+                            left: "1in",
+                        },
+                    },
+                },
+                headers: {
+                    default: new Header({
+                        children: [
+                            ...(headerImageData && headerImageData instanceof ArrayBuffer
+                                ? [
+                                      new Paragraph({
+                                          children: [
+                                              new ImageRun({
+                                                  data: headerImageData,
+                                                  transformation: {
+                                                      width: 60,
+                                                      height: 60,
+                                                  },
+                                              } as import("docx").IImageOptions),
+                                          ],
+                                          alignment: AlignmentType.CENTER,
+                                      }),
+                                  ]
+                                : []),
+                            new Paragraph({
+                                children: [
+                                    new TextRun({
+                                        text: `${config.university || ""}`,
+                                        bold: true,
+                                        size: 24,
+                                    }),
+                                ],
+                                alignment: AlignmentType.CENTER,
+                            }),
+                        ],
+                    }),
+                },
+                children,
+            },
+        ],
+    });
+
+    try {
+        const blob = await Packer.toBlob(doc);
+        saveAs(blob, `${filename.replace(/\s+/g, "_")}_Question_Paper.docx`);
+        toast.success("Word document generated successfully!");
+    } catch (error) {
+        console.error("Error generating Word document:", error);
+        toast.error("Failed to generate Word document.");
+    }
+};
 
   const handleAnswerKeyGenerate = async () => {
     if (!config) return;
@@ -253,11 +482,17 @@ const Result = () => {
               title={config.subjectName}
               content="Question paper generated successfully"
             />
-            <Button onClick={handleWordGenerate} variant="outline" size="sm" className="text-xs sm:text-sm">
-              <Download className="w-4 h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Word</span>
-              <span className="sm:hidden">DOC</span>
-            </Button>
+<Button
+  onClick={handleWordGenerate}
+  variant="outline"
+  size="sm"
+  className="text-xs sm:text-sm"
+>
+  <Download className="w-4 h-4 mr-1 sm:mr-2" />
+  <span className="hidden sm:inline">Word</span>
+  <span className="sm:hidden">DOC</span>
+</Button>
+
             <Button onClick={handleDownload} className="bg-slate-900 hover:bg-slate-800" size="sm">
               <Download className="w-4 h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Export PDF</span>

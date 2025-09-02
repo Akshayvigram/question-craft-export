@@ -30,10 +30,3 @@ router.post("/slack-alert", async (req, res) => {
 });
  return router;
 };
-
-
-
-
-
-
-
