@@ -14,7 +14,8 @@ import { HelpCircle, Wallet } from "lucide-react";
 import axios from "axios";
 
 const Index = () => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState(null);
+  const [profilePicture, setProfilePicture] = useState(null); // New state to hold profile picture
   const [userCredits, setUserCredits] = useState(100); // Mock credits data
   const navigate = useNavigate();
   const [recentPapers, setRecentPapers] = useState([]);
@@ -25,24 +26,38 @@ const Index = () => {
   const storedUser = localStorage.getItem("user");
   const userEmail = storedUser ? JSON.parse(storedUser).email : null;
 
+  // Extract first letter from the user's name (if available)
+  const userInitial = user?.name?.trim() ? user.name.trim()[0].toUpperCase() : "U";
+
   useEffect(() => {
     const checkAuthStatus = () => {
       const userData = localStorage.getItem("user"); // storedUser
       const authToken = localStorage.getItem("authToken");
 
       if (userData && authToken) {
-        setUser(JSON.parse(userData));
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        
+        // Retrieve profile picture using a unique key for the user
+        const savedProfilePic = localStorage.getItem(`profilePicture_${parsedUser.email}`);
+        if (savedProfilePic) {
+          setProfilePicture(savedProfilePic);
+        } else {
+          setProfilePicture(null);
+        }
+
         // Mock credits fetch - in real app this would come from backend
         setUserCredits(100);
       } else {
         setUser(null);
+        setProfilePicture(null); // Clear profile picture on logout
       }
     };
 
     checkAuthStatus();
 
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "user" || e.key === "authToken") {
+    const handleStorageChange = (e) => {
+      if (e.key === "user" || e.key === "authToken" || e.key?.startsWith("profilePicture_")) {
         checkAuthStatus();
       }
     };
@@ -54,12 +69,14 @@ const Index = () => {
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
+    // We don't need to remove the profile picture here, as it's user-specific and can be reloaded on login.
     setUser(null);
+    setProfilePicture(null);
     toast.success("Logged out successfully");
     navigate("/");
   };
 
-  const handleGeneratorClick = (path: string) => {
+  const handleGeneratorClick = (path) => {
     const authToken = localStorage.getItem("authToken");
     const userData = localStorage.getItem("user");
 
@@ -89,7 +106,7 @@ const Index = () => {
     const fetchRecentPapers = async () => {
       try {
         const res = await axios.post(
-          "https://vinathaal.azhizen.com/api/get-questions-paper-history",
+          "http://localhost:3001/api/get-questions-paper-history",
           { email: userEmail }
         );
         // Map backend fields to your UI fields
@@ -241,7 +258,7 @@ const Index = () => {
             <div className="flex items-center space-x-4">
               {user ? (
                 <div className="flex items-center gap-4">
-
+                  
                   <div className="text-right hidden md:block leading-tight">
                     <p className="text-sm text-muted-foreground">Hi,</p>
                     <p className="text-base font-semibold text-foreground">{user.name || user.email}</p>
@@ -249,14 +266,18 @@ const Index = () => {
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <div className="relative w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-primary via-pink-500 to-yellow-400 hover:brightness-110 transition-shadow shadow-md cursor-pointer">
-                        <div className="w-full h-full rounded-full overflow-hidden bg-background">
+                      <div className="relative w-10 h-10 rounded-full p-[2px] bg-gradient-to-br from-gray-200 to-gray-500 hover:brightness-110 transition-all shadow-md cursor-pointer">
+                        {profilePicture ? (
                           <img
-                            src={user.profile || "profile.png"}
+                            src={profilePicture}
                             alt="Profile"
-                            className="w-full h-full object-cover rounded-full"
+                            className="w-full h-full rounded-full object-cover"
                           />
-                        </div>
+                        ) : (
+                          <div className="w-full h-full rounded-full flex items-center justify-center bg-gradient-primary text-white font-bold text-lg">
+                            <span className="leading-none">{userInitial}</span>
+                          </div>
+                        )}
                       </div>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
@@ -276,6 +297,21 @@ const Index = () => {
                         </div>
                       </div>
 
+                      {/* My Profile */}
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to="/profile"
+                          className="group flex items-center gap-3 px-4 py-3 rounded-md w-full transition-all hover:bg-gradient-primary"
+                        >
+                          <div className="p-2 rounded-full bg-primary/10 group-hover:bg-white/20 transition">
+                            <User className="w-5 h-5 text-primary group-hover:text-white" />
+                          </div>
+                          <span className="text-sm font-medium text-foreground group-hover:text-white transition">
+                            My Profile
+                          </span>
+                        </Link>
+                      </DropdownMenuItem>
+
                       {/* Create Community */}
                       <DropdownMenuItem asChild>
                         <Link
@@ -286,7 +322,7 @@ const Index = () => {
                             <Users className="w-5 h-5 text-purple-500 group-hover:text-white" />
                           </div>
                           <span className="text-sm font-medium text-foreground group-hover:text-white transition">
-                            Create Community
+                            Create Team
                           </span>
                         </Link>
                       </DropdownMenuItem>
