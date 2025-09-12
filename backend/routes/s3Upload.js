@@ -54,13 +54,13 @@ module.exports = function S3Upload(config, db) {
 
             await db.query('INSERT INTO question_papers (user_id, qp_s3_url, created_at, subjectName) VALUES (?,?,?,?)', [id, objectURL, dateTime, subjectName]);
 
-            return res.status(200).json({ message: 'Succesfully stored' });
+            return res.status(200).json({ message: 'Data in MySql DB Succesfully stored' });
         } catch (error) {
             console.error('Cannot insert', error);
             return res.status(500).json({ message: 'Databse Error' });
         }
     })
-    
+
     console.log("✅ S3 Upload and DB ready to upload");
 
     //To get recent generated history from db
