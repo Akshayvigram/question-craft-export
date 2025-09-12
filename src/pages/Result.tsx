@@ -138,7 +138,7 @@ const Result = () => {
     formData.append("pdf", pdfBlob, "question_paper.pdf");
     formData.append("password", userPassword);
 
-    const res = await fetch("http://localhost:3001/api/encrypt-pdf", {
+    const res = await fetch("https://vinathaal.azhizen.com/api/encrypt-pdf", {
       method: "POST",
       body: formData
     });
