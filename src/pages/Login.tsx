@@ -30,6 +30,7 @@ const Login = () => {
 
     setIsLoading(true);
 
+    
     try {
       const res = await fetch("https://vinathaal.azhizen.com/api/auth/login", {
         method: "POST",
@@ -109,10 +110,21 @@ const Login = () => {
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-sm">
+              <p className="text-sm text-text-secondary">
                 Don't have an account?{" "}
-                <Link to="/signup" className="text-primary hover:text-accent font-medium">
+                <Link
+                  to="/signup"
+                  className="text-primary hover:text-accent font-medium transition-colors"
+                >
                   Sign up
+                </Link>
+              </p>
+              <p className="text-sm text-text-secondary mt-2">
+                <Link
+                  to="/forgot-password"
+                  className="text-primary hover:text-accent font-medium"
+                >
+                  Forgot your password?
                 </Link>
               </p>
             </div>
@@ -135,13 +147,13 @@ const Login = () => {
                       const res = await fetch("http://localhost:3001/api/auth/google", {
                         method: "POST",
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({token}), // match backend's expected field
+                        body: JSON.stringify({ token }), // match backend's expected field
                       });
 
                       const responseData = await res.json();
 
                       if (res.ok && responseData.success) {
-                        console.log("Google backend response:", responseData); 
+                        console.log("Google backend response:", responseData);
                         toast.success("Google Sign-In successful!");
 
                         // Store user data in consistent format
@@ -180,6 +192,7 @@ const Login = () => {
                     console.error(err);
                   }}
                 >
+
                   <button className="flex items-center gap-3 bg-white border px-6 py-2 rounded-lg shadow hover:shadow-lg transition-shadow">
                     <FcGoogle size={24} />
                     <span className="text-gray-700">Sign in with Google</span>

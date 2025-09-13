@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Index from './pages/Index';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import Generator from './pages/Generator';
+
 import QuestionBankGenerator from './components/QuestionBankGenerator';
 import MCQGenerator from './pages/MCQGenerator';
 import Result from './pages/Result';
@@ -17,6 +17,7 @@ import CreateCommunity from './pages/CreateCommunity';
 import NotFound from './pages/NotFound';
 import { Toaster } from "@/components/ui/toaster";
 import './App.css';
+import Generator from './pages/Generator';
 
 function App() {
   return (
@@ -26,7 +27,7 @@ function App() {
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/generator" element={<Generator />} />
+          <Route path='/generator' element={<Generator />} />
           <Route path="/question-bank" element={<QuestionBankGenerator />} />
           <Route path="/mcq-generator" element={<MCQGenerator />} />
           <Route path="/result" element={<Result />} />
