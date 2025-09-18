@@ -57,6 +57,7 @@ interface Section {
 const Generator = () => {
   const navigate = useNavigate();
   const api_token = localStorage.getItem('apiToken');
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
 
   // Check authentication on component mount
   useEffect(() => {
@@ -85,6 +86,8 @@ const Generator = () => {
   const [isSubjectLocked, setIsSubjectLocked] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const userEmail = user?.email;
 
   const [sections, setSections] = useState<Section[]>([
     {
@@ -396,50 +399,74 @@ const Generator = () => {
 
   const handleGenerate = async () => {
     setIsGenerating(true);
-    // 1. Validate required fields
-    if (!subjectName.trim() || !syllabusText.trim()) {
-      toast.error("Please provide a subject name and syllabus.");
-      return;
-    }
 
-    // Parse the syllabus text into the required structure
-    const parsedUnitTopics = parseSyllabus(syllabusText);
-
-    if (Object.keys(parsedUnitTopics).length === 0) {
-      toast.error("Could not parse units from the syllabus. Please check the format.");
-      return;
-    }
-
-    // Construct the payload with the 'unitTopics' field
-    const payload = {
-      university: university,
-      subjectName: subjectName,
-      examDate: examDate,
-      duration: duration,
-      headerImage: headerImage,
-      totalMarks: totalMarks,
-      // Use the parsed object instead of the raw string
-      unitTopics: parsedUnitTopics,
-      sections: sections.map(section => ({
-        id: section.id,
-        name: section.name,
-        isAutoGenerate: section.isAutoGenerate,
-        autoConfig: section.isAutoGenerate ? section.autoConfig : undefined,
-        individualConfig: !section.isAutoGenerate ? section.individualConfig : undefined,
-        questions: !section.isAutoGenerate ? section.questions : [],
-      })),
-    };
-
-    console.log("Sending corrected payload:", JSON.stringify(payload, null, 2));
-
-    // 3. Send the data to the backend API
     try {
-      // The endpoint should be your actual backend API URL
+      // ✅ 1. Check credits immediately
+      const creditsRes = await fetch("https://vinathaal.azhizen.com/api/get-credits", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${api_token}`,
+        },
+        body: JSON.stringify({ email: userEmail }),
+      });
+
+      const creditsResult = await creditsRes.json();
+
+      if (!creditsRes.ok || creditsResult.credits < 1) {
+        setPopupMessage("Not enough credits to generate a question paper. Let's upgrade to premium");
+        setIsGenerating(false);
+
+        // ⏳ Give user a moment to read the popup, then navigate
+        setTimeout(() => {
+          navigate("/pricing");
+        }, 2000); // wait 2 seconds before redirect
+
+        return; // 🚫 Stop here
+      }
+
+      // ✅ 2. Validate required fields
+      if (!subjectName.trim() || !syllabusText.trim()) {
+        toast.error("Please provide a subject name and syllabus.");
+        setIsGenerating(false);
+        return;
+      }
+
+      // ✅ 3. Parse syllabus
+      const parsedUnitTopics = parseSyllabus(syllabusText);
+      if (Object.keys(parsedUnitTopics).length === 0) {
+        toast.error("Could not parse units from the syllabus. Please check the format.");
+        setIsGenerating(false);
+        return;
+      }
+
+      // ✅ 4. Construct payload
+      const payload = {
+        university,
+        subjectName,
+        examDate,
+        duration,
+        headerImage,
+        totalMarks,
+        unitTopics: parsedUnitTopics,
+        sections: sections.map(section => ({
+          id: section.id,
+          name: section.name,
+          isAutoGenerate: section.isAutoGenerate,
+          autoConfig: section.isAutoGenerate ? section.autoConfig : undefined,
+          individualConfig: !section.isAutoGenerate ? section.individualConfig : undefined,
+          questions: !section.isAutoGenerate ? section.questions : [],
+        })),
+      };
+
+      console.log("Sending corrected payload:", JSON.stringify(payload, null, 2));
+
+      // ✅ 5. Call generate API
       const res = await fetch("https://vinathaal.azhizen.com/api/generate-questions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          'Authorization': `Bearer ${api_token}`
+          Authorization: `Bearer ${api_token}`,
         },
         body: JSON.stringify(payload),
       });
@@ -456,18 +483,40 @@ const Generator = () => {
           type: "descriptive",
         };
 
-        console.log("Saved to sessionStorage:", updatedConfig);
         sessionStorage.setItem("questionPaperConfig", JSON.stringify(updatedConfig));
 
+        // generate token
         const array = new Uint32Array(1);
         crypto.getRandomValues(array);
         const token = array[0].toString(36);
-        console.log(token);
-        
 
         sessionStorage.setItem("token", token);
         sessionStorage.setItem("shouldUploadOnce", "true");
+
         toast.success("Question paper generated successfully!");
+
+        // ✅ 6. Deduct credits only on success
+        try {
+          const deductRes = await fetch("https://vinathaal.azhizen.com/api/deduct-credits", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${api_token}`,
+            },
+            body: JSON.stringify({ email: userEmail }),
+          });
+
+          const deductResult = await deductRes.json();
+          if (!deductRes.ok) {
+            console.error("Credit deduction failed:", deductResult.message);
+            toast.error("Failed to deduct credits. Please check your account.");
+          } else {
+            console.log("✅ Credits updated:", deductResult);
+          }
+        } catch (deductErr) {
+          console.error("Error calling deduct API:", deductErr);
+        }
+
         navigate("/result");
       } else {
         toast.error(result.message || "Failed to generate question paper.");
@@ -479,6 +528,7 @@ const Generator = () => {
       setIsGenerating(false);
     }
   };
+
 
   const units = ["UNIT I", "UNIT II", "UNIT III", "UNIT IV", "UNIT V"];
 
@@ -988,6 +1038,22 @@ const Generator = () => {
             )}
           </Button>
         </div>
+        {/* 🔹 Place popup here so it overlays everything */}
+        {popupMessage && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* Background overlay */}
+            <div
+              className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+              onClick={() => setPopupMessage(null)}
+            />
+
+            {/* Popup Card */}
+            <div className="relative bg-white rounded-2xl shadow-xl border border-gray-200 p-6 w-[340px] text-center animate-fade-in">
+              {/* <h2 className="text-lg font-semibold text-red-600 mb-3">⚠️ Alert</h2> */}
+              <p className="text-gray-700 mb-2">{popupMessage}</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

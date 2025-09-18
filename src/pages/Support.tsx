@@ -58,7 +58,7 @@ const Support = () => {
   const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const api_token = sessionStorage.getItem("token");
+
   // Get user data from localStorage if logged in
   const getUserData = () => {
     try {
@@ -94,73 +94,51 @@ const Support = () => {
     }
   }, [location]);
 
-const onSubmit = async (data: ContactFormData) => {
-  setIsSubmitting(true);
-  try {
-    const response = await fetch("https://vinathaal.azhizen.com/api/support", {
-      method: "POST",
-      headers: { "Content-Type": "application/json",
-        "Authorization": `Bearer ${api_token}`
-      },
-      body: JSON.stringify(data),
-    });
+  const onSubmit = async (data: ContactFormData) => {
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("https://vinathaal.azhizen.com/api/support", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
+      if (!response.ok) {
+        throw new Error("Server error");
+      }
 
-    if (!response.ok) throw new Error("Support API failed");
+      await fetch("https://vinathaal.azhizen.com/api/slack-alert", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: data.fullName,
+          email: data.email,
+          subject: data.subject,
+          message: data.message,
+        }),
+      });
 
-    const slackResponse = await fetch("https://vinathaal.azhizen.com/api/slack-alert", {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${api_token}`
-       },
-      body: JSON.stringify({
-        fullName: data.fullName,
-        email: data.email,
-        subject: data.subject,
-        message: data.message,
-      }),
-    });
+      toast({
+        title: "Message Sent Successfully!",
+        description: "We'll get back to you within 24 hours.",
+      });
 
-  
-    if (!slackResponse.ok) throw new Error("Slack alert failed");
+      form.reset();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-    toast({
-      title: "Success",
-      description: (
-        <div className="flex items-center gap-2 mt-1">
-          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-black text-white text-sm">
-            ✔
-          </span>
-          <span>Message sent successfully!</span>
-        </div>
-      ),
-    });
-
-
-
-
-    form.reset();
-  } catch (error) {
-    console.error("Submit Error:", error);
-    toast({
-      title: "Error",
-      description: (
-        <div className="flex items-center gap-2 mt-1">
-          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-black text-white text-sm">
-            ✘
-          </span>
-          <span>Failed to send message. Please try again.</span>
-        </div>
-      ),
-      variant: "destructive",
-    });
-
-
-  } finally {
-    setIsSubmitting(false);
-  }
-};
 
   const faqs = [
     {
@@ -202,16 +180,19 @@ const onSubmit = async (data: ContactFormData) => {
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      <nav className="bg-background border-b border-border shadow-sm">
+      <nav className="bg-white border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center space-x-2 text-foreground hover:text-muted-foreground">
+            <Link to="/" className="flex items-center space-x-2 text-slate-900 hover:text-slate-700">
               <ArrowLeft className="w-5 h-5" />
               <span>Back to Home</span>
             </Link>
             <div className="flex items-center space-x-2">
-              <FileText className="w-8 h-8 text-primary" />
-              <span className="text-xl font-bold text-primary">Vinathaal</span>
+              <img
+                src="/vinathaal%20logo.png"
+                alt="Vinathaal Logo"
+                className="h-16 w-auto object-contain"
+              />
             </div>
           </div>
         </div>
@@ -271,14 +252,14 @@ const onSubmit = async (data: ContactFormData) => {
                   <Mail className="w-5 h-5 text-accent" />
                   <div>
                     <p className="font-medium text-foreground">Email Support</p>
-                    <p className="text-muted-foreground">azhizensolutions@gmail.com</p>
+                    <p className="text-muted-foreground">support@vinathaal.com</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Phone className="w-5 h-5 text-accent" />
                   <div>
                     <p className="font-medium text-foreground">Phone Support</p>
-                    <p className="text-muted-foreground">+91 97506 03988</p>
+                    <p className="text-muted-foreground">+1 (555) 123-4567</p>
                   </div>
                 </div>
                 <div className="bg-accent/10 p-4 rounded-lg">

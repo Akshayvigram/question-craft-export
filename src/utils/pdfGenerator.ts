@@ -292,7 +292,7 @@ export const generatePDF = async (elementId: string, filename: string): Promise<
   }
 
   // Save or return as Blob
-  return pdf.output('blob');
+  return pdf.output('blob') as Blob;
 };
 
 
