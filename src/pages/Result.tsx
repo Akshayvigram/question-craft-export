@@ -13,7 +13,7 @@ import axios from 'axios'
 // import { Blob } from "buffer";
 // import { generateWordDocument } from "@/utils/pdfGenerator";
 import html2pdf from 'html2pdf.js';
-import { URL } from "url";
+// import { URL } from "url";
 import {
   Document,
   Packer,
@@ -167,7 +167,7 @@ const Result = () => {
     }
 
     const encryptedBlob = await res.blob();
-    const url = URL.createObjectURL(encryptedBlob);
+    const url = window.URL.createObjectURL(encryptedBlob);
 
     const link = document.createElement("a");
     link.href = url;

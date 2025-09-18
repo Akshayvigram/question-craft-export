@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Plus, Trash2, FileText, Image, Settings, Wand2, Brain, Scale, File, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, FileText, Image, Settings, Wand2, Brain, Scale, File as FileIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { S3Upload } from "@/utils/S3Uploads";
 
@@ -56,8 +56,9 @@ interface Section {
 
 const Generator = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { uploadedTemplate } = location.state || {};
   const api_token = localStorage.getItem('apiToken');
-  const [popupMessage, setPopupMessage] = useState<string | null>(null);
 
   // Check authentication on component mount
   useEffect(() => {
@@ -76,6 +77,24 @@ const Generator = () => {
     checkAuth();
   }, [navigate]);
 
+  // Use a separate useEffect to handle uploaded file from navigation state
+  useEffect(() => {
+    if (uploadedTemplate && uploadedTemplate.fileContent) {
+      // Create a Blob from the Base64 data
+      const byteCharacters = atob(uploadedTemplate.fileContent.split(',')[1]);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/octet-stream' });
+      
+      const file = new File([blob], uploadedTemplate.fileName);
+      setSyllabusFile(file);
+      toast.success(`Template "${uploadedTemplate.fileName}" loaded successfully!`);
+    }
+  }, [uploadedTemplate]);
+
   const [subjectName, setSubjectName] = useState("");
   const [university, setUniversity] = useState("");
   const [examDate, setExamDate] = useState("");
@@ -86,8 +105,6 @@ const Generator = () => {
   const [isSubjectLocked, setIsSubjectLocked] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const userEmail = user?.email;
 
   const [sections, setSections] = useState<Section[]>([
     {
@@ -113,6 +130,8 @@ const Generator = () => {
     }
   ]);
 
+  // The handleSyllabusUpload function is no longer needed to call the API directly
+  // It now just sets the file to state and a toast message.
   const handleSyllabusUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -366,16 +385,14 @@ const Generator = () => {
 
   const parseSyllabus = (text: string): { [key: string]: string } => {
     const unitTopics: { [key: string]: string } = {};
-    // Regex to find "UNIT" followed by a Roman numeral or number, and then the unit title
     const unitRegex = /(UNIT\s+[IVX\d]+[\s\S]*?)(?=\n\s*UNIT\s+[IVX\d]+|$)/g;
 
     let match;
     while ((match = unitRegex.exec(text)) !== null) {
       const unitBlock = match[1].trim();
-      // Extract the unit title (e.g., "UNIT I INTRODUCTION")
       const titleMatch = unitBlock.match(/^(UNIT\s+[IVX\d]+)/);
       if (titleMatch) {
-        const unitName = titleMatch[0].trim(); // e.g., "UNIT I"
+        const unitName = titleMatch[0].trim();
         const unitContent = unitBlock.replace(unitName, '').trim();
         unitTopics[unitName] = unitContent;
       }
@@ -397,78 +414,44 @@ const Generator = () => {
     }
   }, 0);
 
+  // Update this function to send both the file and data in one call
   const handleGenerate = async () => {
     setIsGenerating(true);
 
+    if (!syllabusFile) {
+        toast.error("Please select a syllabus file or load a template.");
+        setIsGenerating(false);
+        return;
+    }
+
+    const payload = {
+      university: university,
+      subjectName: subjectName,
+      examDate: examDate,
+      duration: duration,
+      headerImage: headerImage,
+      totalMarks: totalMarks,
+      sections: sections.map(section => ({
+        id: section.id,
+        name: section.name,
+        isAutoGenerate: section.isAutoGenerate,
+        autoConfig: section.isAutoGenerate ? section.autoConfig : undefined,
+        individualConfig: !section.isAutoGenerate ? section.individualConfig : undefined,
+        questions: !section.isAutoGenerate ? section.questions : [],
+      })),
+    };
+
+    // Create a FormData object to send both file and JSON payload
+    const formData = new FormData();
+    formData.append('payload', JSON.stringify(payload));
+    formData.append('syllabusFile', syllabusFile);
+
     try {
-      // ✅ 1. Check credits immediately
-      const creditsRes = await fetch("https://vinathaal.azhizen.com/api/get-credits", {
+      // Point to the new backend endpoint
+      const res = await fetch("http://localhost:3001/api/generate-questions", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${api_token}`,
-        },
-        body: JSON.stringify({ email: userEmail }),
-      });
-
-      const creditsResult = await creditsRes.json();
-
-      if (!creditsRes.ok || creditsResult.credits < 1) {
-        setPopupMessage("Not enough credits to generate a question paper. Let's upgrade to premium");
-        setIsGenerating(false);
-
-        // ⏳ Give user a moment to read the popup, then navigate
-        setTimeout(() => {
-          navigate("/pricing");
-        }, 2000); // wait 2 seconds before redirect
-
-        return; // 🚫 Stop here
-      }
-
-      // ✅ 2. Validate required fields
-      if (!subjectName.trim() || !syllabusText.trim()) {
-        toast.error("Please provide a subject name and syllabus.");
-        setIsGenerating(false);
-        return;
-      }
-
-      // ✅ 3. Parse syllabus
-      const parsedUnitTopics = parseSyllabus(syllabusText);
-      if (Object.keys(parsedUnitTopics).length === 0) {
-        toast.error("Could not parse units from the syllabus. Please check the format.");
-        setIsGenerating(false);
-        return;
-      }
-
-      // ✅ 4. Construct payload
-      const payload = {
-        university,
-        subjectName,
-        examDate,
-        duration,
-        headerImage,
-        totalMarks,
-        unitTopics: parsedUnitTopics,
-        sections: sections.map(section => ({
-          id: section.id,
-          name: section.name,
-          isAutoGenerate: section.isAutoGenerate,
-          autoConfig: section.isAutoGenerate ? section.autoConfig : undefined,
-          individualConfig: !section.isAutoGenerate ? section.individualConfig : undefined,
-          questions: !section.isAutoGenerate ? section.questions : [],
-        })),
-      };
-
-      console.log("Sending corrected payload:", JSON.stringify(payload, null, 2));
-
-      // ✅ 5. Call generate API
-      const res = await fetch("https://vinathaal.azhizen.com/api/generate-questions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${api_token}`,
-        },
-        body: JSON.stringify(payload),
+        // Do NOT set Content-Type header when using FormData, the browser handles it automatically
+        body: formData,
       });
 
       const result = await res.json();
@@ -484,39 +467,8 @@ const Generator = () => {
         };
 
         sessionStorage.setItem("questionPaperConfig", JSON.stringify(updatedConfig));
-
-        // generate token
-        const array = new Uint32Array(1);
-        crypto.getRandomValues(array);
-        const token = array[0].toString(36);
-
-        sessionStorage.setItem("token", token);
         sessionStorage.setItem("shouldUploadOnce", "true");
-
         toast.success("Question paper generated successfully!");
-
-        // ✅ 6. Deduct credits only on success
-        try {
-          const deductRes = await fetch("https://vinathaal.azhizen.com/api/deduct-credits", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${api_token}`,
-            },
-            body: JSON.stringify({ email: userEmail }),
-          });
-
-          const deductResult = await deductRes.json();
-          if (!deductRes.ok) {
-            console.error("Credit deduction failed:", deductResult.message);
-            toast.error("Failed to deduct credits. Please check your account.");
-          } else {
-            console.log("✅ Credits updated:", deductResult);
-          }
-        } catch (deductErr) {
-          console.error("Error calling deduct API:", deductErr);
-        }
-
         navigate("/result");
       } else {
         toast.error(result.message || "Failed to generate question paper.");
@@ -528,7 +480,6 @@ const Generator = () => {
       setIsGenerating(false);
     }
   };
-
 
   const units = ["UNIT I", "UNIT II", "UNIT III", "UNIT IV", "UNIT V"];
 
@@ -565,7 +516,7 @@ const Generator = () => {
               <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer bg-gradient-subtle">
                 <input
                   type="file"
-                  accept=".pdf,.doc,.docx,.txt,.jpeg,.jpg"
+                  accept=".pdf,.doc,.docx,.txt,.jpeg,.jpg" // Removed image formats
                   onChange={handleSyllabusUpload}
                   className="hidden"
                   id="syllabus-upload"
@@ -581,7 +532,7 @@ const Generator = () => {
                     <>
                       <FileText className="w-12 h-12 mx-auto text-accent mb-4" />
                       <p className="text-text-primary font-medium">Click to upload your syllabus</p>
-                      <p className="text-sm text-text-secondary mt-2">PDF, DOC, DOCX, TXT, JPG, JPEG up to 10MB</p>
+                      <p className="text-sm text-text-secondary mt-2">PDF, DOC, DOCX, TXT</p>
                     </>
                   )}
                 </label>
@@ -1038,22 +989,6 @@ const Generator = () => {
             )}
           </Button>
         </div>
-        {/* 🔹 Place popup here so it overlays everything */}
-        {popupMessage && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
-            {/* Background overlay */}
-            <div
-              className="absolute inset-0 bg-black/30 backdrop-blur-sm"
-              onClick={() => setPopupMessage(null)}
-            />
-
-            {/* Popup Card */}
-            <div className="relative bg-white rounded-2xl shadow-xl border border-gray-200 p-6 w-[340px] text-center animate-fade-in">
-              {/* <h2 className="text-lg font-semibold text-red-600 mb-3">⚠️ Alert</h2> */}
-              <p className="text-gray-700 mb-2">{popupMessage}</p>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
