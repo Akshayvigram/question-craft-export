@@ -16,7 +16,7 @@ import axios from "axios";
 const Index = () => {
   const [user, setUser] = useState(null);
   const [profilePicture, setProfilePicture] = useState(null); // New state to hold profile picture
-  const [userCredits, setUserCredits] = useState(100); // Mock credits data
+  const [userCredits, setUserCredits] = useState(0); // Mock credits data
   const navigate = useNavigate();
   const [recentPapers, setRecentPapers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,40 +30,44 @@ const Index = () => {
   const userInitial = user?.name?.trim() ? user.name.trim()[0].toUpperCase() : "U";
 
   useEffect(() => {
-    const checkAuthStatus = () => {
+    const checkAuthStatus = async () => {
       const userData = localStorage.getItem("user"); // storedUser
       const authToken = localStorage.getItem("authToken");
 
       if (userData && authToken) {
         const parsedUser = JSON.parse(userData);
         setUser(parsedUser);
-        
-        // Retrieve profile picture using a unique key for the user
-        const savedProfilePic = localStorage.getItem(`profilePicture_${parsedUser.email}`);
-        if (savedProfilePic) {
-          setProfilePicture(savedProfilePic);
-        } else {
-          setProfilePicture(null);
-        }
 
-        // Mock credits fetch - in real app this would come from backend
-        setUserCredits(100);
+        // Retrieve profile picture
+        const savedProfilePic = localStorage.getItem(`profilePicture_${parsedUser.email}`);
+        setProfilePicture(savedProfilePic || null);
+
+        try {
+          // ✅ Fetch real credits from backend
+          const response = await fetch("https://vinathaal.azhizen.com/api/get-credits", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: parsedUser.email }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch credits");
+          }
+
+          const data = await response.json();
+          setUserCredits(data.credits); // ✅ Set real credits
+        } catch (error) {
+          console.error("Error fetching credits:", error);
+          setUserCredits(0); // fallback
+        }
       } else {
         setUser(null);
-        setProfilePicture(null); // Clear profile picture on logout
+        setProfilePicture(null);
+        // setUserCredits(0); // no user, no credits
       }
     };
 
     checkAuthStatus();
-
-    const handleStorageChange = (e) => {
-      if (e.key === "user" || e.key === "authToken" || e.key?.startsWith("profilePicture_")) {
-        checkAuthStatus();
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   const handleLogout = () => {

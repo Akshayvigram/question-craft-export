@@ -20,6 +20,7 @@ const s3Upload = require('./routes/s3Upload');
 const createTokenAuthMiddleware = require('./utils/middleware'); 
 const EncryptPDF = require("./routes/EncryptPDF")
 const sendPDFEmail = require("./routes/sendPDFEmail")
+const creditsHandling = require("./routes/creditsHandling");
 
 /**
  * Main function to initialize services and start the Express server.
@@ -56,6 +57,7 @@ async function startServer() {
     const perplexityService = createPerplexityService(config);
 
     //api's which doesn't require authorization
+    app.use("/api", creditsHandling(db));
     app.use("/api", sendPDFEmail(config));
     app.use('/api/auth', authRoutes(db, transporter, config));
     app.use("/api", EncryptPDF());
