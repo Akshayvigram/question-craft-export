@@ -13,7 +13,7 @@ import axios from 'axios'
 // import { Blob } from "buffer";
 // import { generateWordDocument } from "@/utils/pdfGenerator";
 import html2pdf from 'html2pdf.js';
-// import { URL } from "url";
+//import { URL } from "url";
 import {
   Document,
   Packer,
@@ -168,7 +168,6 @@ const Result = () => {
 
     const encryptedBlob = await res.blob();
     const url = window.URL.createObjectURL(encryptedBlob);
-
     const link = document.createElement("a");
     link.href = url;
     link.download = config?.subjectName || 'Question-paper'
@@ -401,7 +400,6 @@ const handleWordGenerate = async () => {
         toast.error("Failed to generate Word document.");
     }
 };
-
   const handleAnswerKeyGenerate = async () => {
     if (!config) return;
 
@@ -549,7 +547,12 @@ const handleWordGenerate = async () => {
                 pdfBlob={pdfBlob}
               />
             )}
-            <Button onClick={handleWordGenerate} variant="outline" size="sm" className="text-xs sm:text-sm">
+            <Button
+              onClick={handleWordGenerate}
+              variant="outline"
+              size="sm"
+              className="text-xs sm:text-sm"
+            >
               <Download className="w-4 h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Word</span>
               <span className="sm:hidden">DOC</span>
