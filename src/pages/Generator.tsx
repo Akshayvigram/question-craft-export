@@ -497,7 +497,7 @@ const Generator = () => {
 
         // ✅ 6. Deduct credits only on success
         try {
-          const deductRes = await fetch("http://localhost:3001/api/deduct-credits", {
+          const deductRes = await fetch("https://vinathaal.azhizen.com/api/deduct-credits", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
