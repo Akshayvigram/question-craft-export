@@ -44,7 +44,7 @@ const Index = () => {
 
         try {
           // ✅ Fetch real credits from backend
-          const response = await fetch("http://localhost:3001/api/get-credits", {
+          const response = await fetch("https://vinathaal.azhizen.com/api/get-credits", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: parsedUser.email }),

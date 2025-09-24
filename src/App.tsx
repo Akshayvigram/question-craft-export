@@ -28,7 +28,7 @@ function App() {
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path='/generator' element={<Generator />} />
+          <Route path="/generator" element={<Generator />} />
           <Route path="/question-bank" element={<QuestionBankGenerator />} />
           <Route path="/mcq-generator" element={<MCQGenerator />} />
           <Route path="/result" element={<Result />} />

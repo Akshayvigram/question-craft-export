@@ -144,7 +144,7 @@ const Login = () => {
 
                       setIsLoading(true);
 
-                      const res = await fetch("http://localhost:3001/api/auth/google", {
+                      const res = await fetch("https://vinathaal.azhizen.com/api/auth/google", {
                         method: "POST",
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ token }), // match backend's expected field

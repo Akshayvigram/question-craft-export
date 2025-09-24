@@ -202,7 +202,7 @@ const Signup = () => {
 
                     setIsLoading(true);
 
-                    const res = await fetch("http://localhost:3001/api/auth/google-signup", {
+                    const res = await fetch("https://vinathaal.azhizen.com/api/auth/google-signup", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ token }),
