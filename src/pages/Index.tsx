@@ -212,7 +212,7 @@ const Index = () => {
                           className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gradient-primary text-sm transition-all text-foreground"
                         >
                           <Upload className="w-4 h-4" />
-                          Generator using Syllabus
+                          Generator Syllabus
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
@@ -243,7 +243,7 @@ const Index = () => {
                     MCQ Generator
                   </Link>
                   <Link
-                    to="/generator?mode=syllabus"
+                    to="/generator"
                     className="relative font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-full after:h-[5px] after:bg-gradient-primary after:rounded-full after:scale-x-0 hover:after:scale-x-100 after:origin-center after:transition-transform"
                   >
                     Syllabus Generator

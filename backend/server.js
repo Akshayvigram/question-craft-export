@@ -1,13 +1,15 @@
 // server.js
-
+const cookieParser = require('cookie-parser');
 const express = require('express');
 const cors = require('cors');
+//const bodyParser = require('body-parser');
+
 
 // --- Import Factory Functions & Routers ---
 const loadConfig = require('./utils/config'); // Your async config loader
 const createDbPool = require('./awsdb');      // Factory for the DB pool
 const createTransporter = require('./utils/mailer'); // Factory for the mail transporter
-const createPerplexityService = require('./services/generateWithPerplexity'); 
+const createPerplexityService = require('./services/generateWithPerplexity');
 const authRoutes = require('./routes/auth');       // Auth router factory
 const statsRoutes = require('./routes/stats');     // Stats router factory
 const extractRoute = require('./routes/extract');  // Extract router factory
@@ -18,6 +20,8 @@ const slackAlertRoute = require('./routes/slack'); // Slack alert router factory
 const userRoutes = require('./routes/user'); // User management router factory
 const s3Upload = require('./routes/s3Upload');
 const createTokenAuthMiddleware = require('./utils/middleware'); 
+const googleLoginRoute = require('./routes/googleLoginRoute');
+const googleSignupRoute = require("./routes/googleSignupRoute");
 const EncryptPDF = require("./routes/EncryptPDF")
 const sendPDFEmail = require("./routes/sendPDFEmail")
 const creditsHandling = require("./routes/creditsHandling");
@@ -42,11 +46,24 @@ async function startServer() {
 
     // 4. SET UP GLOBAL MIDDLEWARE
     app.use(cors({
-      origin: ['http://localhost:8080', 'http://localhost:3000', config.FRONTEND_URL],
-      credentials: true
+      origin: "*", 
+     // origin: ['http://localhost:8080', 'https://vinathaal.azhizen.com']// your frontends
+      credentials: true,
     }));
+
+
+
+    // Important for Google OAuth popups    
+    {/*app.use((req, res, next) => {
+      res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+      res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+      next();
+    });*/}
+
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
+    //app.use(cookieParser());
+    //app.use(bodyParser.json());
 
     // Simple request logger
     app.use((req, res, next) => {
@@ -79,6 +96,24 @@ async function startServer() {
     
     // --- System Routes ---
     
+    app.use('/api/user', userRoutes(db)); 
+    app.use("/api", googleLoginRoute);
+    app.use("/api", googleSignupRoute(config));
+
+    app.get("/", (req, res) => {
+      res.send("Server is running...");
+    });
+
+
+
+
+
+
+    // --- System Routes ---
+    app.get('/health', (req, res) => {
+      res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+    });
+
     // 6. SET UP FINAL ERROR HANDLING MIDDLEWARE
     // This should be the last middleware you use.
     app.use((err, req, res, next) => {
