@@ -1,21 +1,21 @@
-// server.js
+// server.js - CORRECTED VERSION FOR CLOUD RUN DEPLOYMENT
 
 const express = require('express');
 const cors = require('cors');
 
 // --- Import Factory Functions & Routers ---
-const loadConfig = require('./utils/config'); // Your async config loader
-const createDbPool = require('./awsdb');      // Factory for the DB pool
-const createTransporter = require('./utils/mailer'); // Factory for the mail transporter
+const loadConfig = require('./utils/config'); 
+const createDbPool = require('./awsdb');      
+const createTransporter = require('./utils/mailer'); 
 const createPerplexityService = require('./services/generateWithPerplexity'); 
-const authRoutes = require('./routes/auth');       // Auth router factory
-const statsRoutes = require('./routes/stats');     // Stats router factory
-const extractRoute = require('./routes/extract');  // Extract router factory
-const generateRoute = require('./routes/generate'); // Generate router factory
-const answerKeyRoute = require('./routes/generateAnswer'); // Answer Key router factory
-const supportRoute = require('./routes/support'); // Support router factory 
-const slackAlertRoute = require('./routes/slack'); // Slack alert router factory
-const userRoutes = require('./routes/user'); // User management router factory
+const authRoutes = require('./routes/auth');       
+const statsRoutes = require('./routes/stats');     
+const extractRoute = require('./routes/extract');  
+const generateRoute = require('./routes/generate'); 
+const answerKeyRoute = require('./routes/generateAnswer'); 
+const supportRoute = require('./routes/support'); 
+const slackAlertRoute = require('./routes/slack'); 
+const userRoutes = require('./routes/user'); 
 const s3Upload = require('./routes/s3Upload');
 const createTokenAuthMiddleware = require('./utils/middleware'); 
 
@@ -24,16 +24,19 @@ const createTokenAuthMiddleware = require('./utils/middleware');
  */
 async function startServer() {
   try {
-    // 1. LOAD CONFIGURATION
-    // This is the first and most critical step.
+    // 1. LOAD CONFIGURATION (MUST SUCCEED)
     const config = await loadConfig();
     console.log('✅ Configuration loaded successfully.');
 
-    // 2. INITIALIZE SERVICES
-    // Create dependencies that rely on the loaded configuration.
-    const db = createDbPool(config);
+    // 2. INITIALIZE SERVICES (DECOUPLED)
+    // CRITICAL FIX: The factory functions must be NON-BLOCKING on startup.
+    // They should return the pool/client instance, which will only error 
+    // when the first actual query is attempted.
+    const db = createDbPool(config);        // If this blocks, it will crash the app.
     const transporter = createTransporter(config);
     const protect = createTokenAuthMiddleware(db);
+    const perplexityService = createPerplexityService(config);
+
     // 3. CREATE EXPRESS APP
     const app = express();
 
@@ -51,17 +54,19 @@ async function startServer() {
       next();
     });
 
-    const perplexityService = createPerplexityService(config);
-
-    //api's which doesn't require authorization
-    app.use('/api/auth', authRoutes(db, transporter, config));
-    app.use('/api', statsRoutes(db, config));
+    // CRITICAL: Ensure Health Check is defined before app.listen()
     app.get('/health', (req, res) => {
+      // The health check must respond immediately without hitting the DB
       res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
     });
     
-    // 5. PROTECT ROUTES THAT REQUIRE AUTHORIZATION
+    // 5. DEFINE ROUTES (Routes will crash ONLY when called if the DB is down)
 
+    // APIs which don't require authorization
+    app.use('/api/auth', authRoutes(db, transporter, config));
+    app.use('/api', statsRoutes(db, config));
+
+    // PROTECTED ROUTES
     app.use(protect);
     app.use('/api', extractRoute);
     app.use('/api', generateRoute(perplexityService));
@@ -71,26 +76,26 @@ async function startServer() {
     app.use('/api/user', userRoutes(db));
     app.use('/api', s3Upload(config, db));
     
-    // --- System Routes ---
-    
     // 6. SET UP FINAL ERROR HANDLING MIDDLEWARE
-    // This should be the last middleware you use.
     app.use((err, req, res, next) => {
       console.error('Unhandled Error:', err);
       res.status(500).json({ message: 'An internal server error occurred.' });
     });
 
-    // 7. START THE SERVER
-    const PORT = config.PORT || 3001;
-    app.listen(PORT, '0.0.0.0', () => {
+    // 7. START THE SERVER (The order is critical for Cloud Run!)
+    // CRITICAL FIX: Always use process.env.PORT provided by the platform.
+    const PORT = process.env.PORT || 8080; // Cloud Run injects the port here
+    
+    // The listen call must succeed to pass the health check. Bind to 0.0.0.0.
+    app.listen(PORT, '0.0.0.0', () => { 
       console.log(`✅ Server is running on port ${PORT}`);
       console.log(`📍 Health check available at http://localhost:${PORT}/health`);
     });
 
   } catch (error) {
-    // This will catch any fatal errors during the startup process.
+    // This catches fatal errors during server setup and exits the container
     console.error('❌ Fatal error during server startup:', error);
-    process.exit(1); // Exit the process with a failure code
+    process.exit(1);
   }
 }
 
