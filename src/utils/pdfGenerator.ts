@@ -249,64 +249,7 @@ import jsPDF from "jspdf";
 
 
 
-export const generateDocx  = (elementId: string, filename: string) => {
-  const element = document.getElementById(elementId);
-  if (!element) {
-    console.error(`Element with id "${elementId}" not found`);
-    return;
-  }
 
-  let htmlContent = element.innerHTML;
-
-  // Clean up the HTML for Word
-  htmlContent = htmlContent.replace(/class="[^"]*"/g, ''); // Remove CSS classes
-  htmlContent = htmlContent.replace(/<button[^>]*>.*?<\/button>/gs, ''); // Remove buttons
-  htmlContent = htmlContent.replace(/class="no-print"[^>]*>.*?<\/[^>]*>/gs, ''); // Remove no-print elements
-
-  const wordDocument = `
-    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">
-    <head>
-      <meta charset="utf-8">
-      <title>${filename}</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          margin: 40px;
-          line-height: 1.4;
-        }
-        .header {
-          text-align: center;
-          margin-bottom: 30px;
-        }
-        .question {
-          margin-bottom: 15px;
-        }
-        .section-title {
-          font-weight: bold;
-          text-decoration: underline;
-          margin: 20px 0 10px 0;
-        }
-        .sub-questions {
-          margin-left: 20px;
-        }
-      </style>
-    </head>
-    <body>
-      ${htmlContent}
-    </body>
-    </html>
-  `;
-
-  const blob = new Blob([wordDocument], { type: 'application/msword' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `${filename}.doc`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-};
 
 export const generatePDF = async (elementId: string, filename: string): Promise<Blob | undefined> => {
   const element = document.getElementById(elementId);
@@ -349,7 +292,7 @@ export const generatePDF = async (elementId: string, filename: string): Promise<
   }
 
   // Save or return as Blob
-  return pdf.output('blob');
+  return pdf.output('blob') as Blob;
 };
 
 

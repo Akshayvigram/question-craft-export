@@ -15,7 +15,7 @@ export const S3Upload = async (config, token) => {
 
         const paperData = typeof config === "string" ? JSON.parse(config) : config;
         const subjectName = paperData.subjectName;
-        console.log("Subject Name"+subjectName);
+        console.log("Subject Name: "+subjectName);
 
 
         // const filename = (config?.subjectName || 'Question Paper') + ".pdf";
@@ -23,7 +23,7 @@ export const S3Upload = async (config, token) => {
 
         const filename = `${subjectName.replace(/\s+/g, '_')}_${token}.pdf`;
 
-        console.log("File Name"+filename);
+        console.log("File Name: "+filename);
 
         // console.log(filename);
 
@@ -31,8 +31,8 @@ export const S3Upload = async (config, token) => {
 
 
         const file = new File([blob], filename, { type: blob.type });
-        console.log("File.name"+file.name);
-        console.log("File.type"+file.type);
+        console.log("File.name: "+file.name);
+        console.log("File.type: "+file.type);
 
         const payload = {
             filename: file.name,

@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,13 +7,27 @@ import { toast } from "sonner";
 import AnswerKeyGenerator from "@/components/AnswerKeyGenerator";
 import ShareDialog from "@/components/ShareDialog";
 import EditableQuestionPaper from "@/components/EditableQuestionPaper";
-import { generatePDF, generateDocx } from "@/utils/pdfGenerator";
+import { generatePDF } from "@/utils/pdfGenerator";
 import { S3Upload } from "@/utils/S3Uploads";
 import axios from 'axios'
 // import { Blob } from "buffer";
 // import { generateWordDocument } from "@/utils/pdfGenerator";
 import html2pdf from 'html2pdf.js';
-import { URL } from "url";
+//import { URL } from "url";
+import {
+  Document,
+  Packer,
+  Paragraph,
+  TextRun,
+  AlignmentType,
+  ImageRun,
+  Header,
+  Tab,
+  TabStopType,
+  TabStopPosition,
+} from "docx";
+import { saveAs } from "file-saver";
+// import html2pdf from "html2pdf.js"
 
 interface QuestionPaperConfig {
   subjectName: string;
@@ -44,43 +57,67 @@ const Result = () => {
   const [uploading, setUploading] = useState(false);
   const paperRef = useRef<HTMLDivElement>(null);
   // const [token, setToken] = useState(null);
-      const token = sessionStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
+  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
+  const [protectedBlob, setProtectedBlob] = useState<Blob | null>(null);
+
 
   useEffect(() => {
     const savedConfig = sessionStorage.getItem("questionPaperConfig");
-
     const token = sessionStorage.getItem("token");
-    const sholudUpload = sessionStorage.getItem("shouldUploadOnce");
+    const shouldUpload = sessionStorage.getItem("shouldUploadOnce");
 
     if (savedConfig) {
       try {
         const parsed = JSON.parse(savedConfig);
 
-        const cleanedSections = parsed.sections?.map(section => ({
-          ...section,
-          questions: section.questions || [],
-        })) || [];
+        const cleanedSections =
+          parsed.sections?.map((section: any) => ({
+            ...section,
+            questions: section.questions || [],
+          })) || [];
 
         setConfig({
           ...parsed,
           sections: cleanedSections,
         });
 
+        // 🔹 Step 1: Generate PDF automatically after mount
+        const timer = setTimeout(async () => {
+          if (paperRef.current) {
+            const opt = {
+              margin: [0.5, 0.5, 0.5, 0.5],
+              filename: `${parsed.subjectName.replace(/\s+/g, "_")}_Question_Paper.pdf`,
+              image: { type: "jpeg", quality: 0.98 },
+              html2canvas: { scale: 2 },
+              jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+            };
 
-        if (sholudUpload == "true") {
-          const delay = setTimeout(()=> {
-            setUploading(true);
-            S3Upload(savedConfig, token)
-            .then(()=> {
-              // console.log("✅ Uploaded to S3");
-              toast.success("Uploaded to S3 successfully");
-            }).finally(()=> {
-              setUploading(false);
-              sessionStorage.removeItem("shouldUploadOnce");
-            })
-          }, 1500);
-          return ()=> clearTimeout(delay);
-        }
+            // Generate PDF blob automatically
+            const pdfBlob: Blob = await html2pdf()
+              .from(paperRef.current)
+              .set(opt)
+              .output("blob");
+
+
+            setPdfBlob(pdfBlob); // store blob for later download
+
+            // 🔹 Step 2: Upload to S3 if required
+            if (shouldUpload === "true") {
+              setUploading(true);
+              S3Upload(savedConfig, token)
+                .then(() => {
+                  toast.success("Uploaded to S3 successfully");
+                })
+                .finally(() => {
+                  setUploading(false);
+                  sessionStorage.removeItem("shouldUploadOnce");
+                });
+            }
+          }
+        }, 2000);
+
+        return () => clearTimeout(timer);
       } catch (err) {
         console.error("Failed to parse config:", err);
       }
@@ -89,26 +126,280 @@ const Result = () => {
     }
   }, []);
 
-  const handleDownload = () => {
-    const element = paperRef.current;
-    console.log("Downloading PDF for element:", element);
-    if (element) {
-      html2pdf().from(element).set({
-        margin: [0.5, 0.5, 0.5, 0.5],
-        filename: `${config.subjectName.replace(/\s+/g, '_')}_Question_Paper.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-      }).save();
+
+  // Simple Download Option
+
+  // const handleDownload = () => {
+  //   const element = paperRef.current;
+  //   // console.log("Downloading PDF for element:", element);
+  //   if (element) {
+  //     html2pdf().from(element).set({
+  //       margin: [0.5, 0.5, 0.5, 0.5],
+  //       filename: `${config.subjectName.replace(/\s+/g, '_')}_Question_Paper.pdf`,
+  //       image: { type: 'jpeg', quality: 0.98 },
+  //       html2canvas: { scale: 2 },
+  //       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+  //     }).save();
+  //   }
+  // };
+
+
+  // Download with password Protection -- Password by the user or vina123
+  const handleDownload = async () => {
+    if (!pdfBlob) {
+      toast.error("PDF not available");
+      return;
     }
+
+    const userPassword = prompt("Enter password to encrypt PDF:") || "";
+    const formData = new FormData();
+    formData.append("pdf", pdfBlob, "question_paper.pdf");
+    formData.append("password", userPassword);
+
+    const res = await fetch("https://vinathaal.azhizen.com/api/encrypt-pdf", {
+      method: "POST",
+      body: formData
+    });
+
+    if (!res.ok) {
+      toast.error("Encryption failed");
+      return;
+    }
+
+    const encryptedBlob = await res.blob();
+    const url = window.URL.createObjectURL(encryptedBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = config?.subjectName || 'Question-paper'
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+
+    toast.success("Encrypted PDF downloaded");
   };
 
-  const handleWordGenerate = () => {
-    const filename = config?.subjectName || 'question-paper';
-    generateDocx('question-paper-content', filename);
-    toast.success("Word document downloaded successfully!");
-  };
+  
+const handleWordGenerate = async () => {
+    if (!config) {
+        toast.error("No configuration available for document generation.");
+        return;
+    }
 
+    const filename = config.subjectName || "question-paper";
+    const children: Paragraph[] = [];
+
+    // Utility: fetch image and convert to ArrayBuffer
+    const urlToArrayBuffer = async (url: string) => {
+        try {
+            // Validate URL using browser's native URL constructor
+            const validUrl = new window.URL(url, window.location.origin);
+            console.log("Fetching image from:", validUrl.href);
+            const response = await fetch(url, { mode: 'cors' });
+            if (!response.ok) {
+                throw new Error(`Failed to fetch image: ${response.statusText}`);
+            }
+            const contentType = response.headers.get('content-type');
+            if (!contentType?.includes('image/png') && !contentType?.includes('image/jpeg')) {
+                throw new Error('Unsupported image format. Only PNG and JPEG are supported.');
+            }
+            const arrayBuffer = await response.arrayBuffer();
+            if (arrayBuffer.byteLength === 0) {
+                throw new Error('Fetched image data is empty.');
+            }
+            console.log("Image fetched successfully, size:", arrayBuffer.byteLength);
+            return arrayBuffer;
+        } catch (error) {
+            console.error("Error fetching image:", error);
+            toast.error("Failed to load header image. Generating document without image.");
+            return null;
+        }
+    };
+
+    // Get the header image data as an ArrayBuffer
+    console.log("Header Image URL:", config.headerImage);
+    const headerImageData = config.headerImage
+        ? await urlToArrayBuffer(config.headerImage)
+        : null;
+    console.log("Header Image Data:", headerImageData ? `ArrayBuffer (${headerImageData.byteLength} bytes)` : 'null');
+
+    // Build the main document content
+    children.push(
+        new Paragraph({
+            children: [
+                new TextRun({
+                    text: "Question Paper",
+                    bold: true,
+                    size: 32,
+                }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 200 },
+        })
+    );
+
+    children.push(
+        new Paragraph({
+            children: [
+                new TextRun({
+                    text: config.subjectName,
+                    bold: true,
+                    size: 28,
+                }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 400 },
+        })
+    );
+
+    children.push(
+        new Paragraph({
+            tabStops: [
+                {
+                    type: TabStopType.CENTER,
+                    position: 4680,
+                },
+                {
+                    type: TabStopType.RIGHT,
+                    position: TabStopPosition.MAX,
+                },
+            ],
+            spacing: { after: 400 },
+            children: [
+                new TextRun({
+                    text: `Date: ${config.examDate || "________"}`,
+                    size: 24,
+                }),
+                new TextRun({ children: [new Tab()] }),
+                new TextRun({
+                    text: `Duration: ${config.duration || "________"}`,
+                    size: 24,
+                }),
+                new TextRun({ children: [new Tab()] }),
+                new TextRun({
+                    text: `Total Marks: ${config.totalMarks || "________"}`,
+                    size: 24,
+                }),
+            ],
+        })
+    );
+
+    config.sections.forEach((section, sIndex) => {
+        children.push(
+            new Paragraph({
+                children: [
+                    new TextRun({
+                        text: section.name,
+                        bold: true,
+                        size: 28,
+                    }),
+                ],
+                alignment: AlignmentType.CENTER,
+                spacing: { after: 200 },
+            })
+        );
+        section.questions.forEach((q: any, qIndex: number) => {
+            children.push(
+                new Paragraph({
+                    children: [
+                        new TextRun({
+                            text: `${qIndex + 1}. ${q.text || q.question}`,
+                            size: 24,
+                        }),
+                    ],
+                    alignment: AlignmentType.LEFT,
+                })
+            );
+            children.push(
+                new Paragraph({
+                    children: [
+                        new TextRun({
+                            text: `[${q.marks} Marks]`,
+                            size: 22,
+                            bold: true,
+                        }),
+                    ],
+                    alignment: AlignmentType.RIGHT,
+                    spacing: { after: 200 },
+                })
+            );
+        });
+    });
+
+    children.push(
+        new Paragraph({
+            children: [
+                new TextRun({
+                    text: "Generated using AI Question Paper Generator",
+                    italics: true,
+                    size: 20,
+                }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 600 },
+        })
+    );
+
+    // Build the Word document
+    const doc = new Document({
+        sections: [
+            {
+                properties: {
+                    page: {
+                        margin: {
+                            top: "1in",
+                            right: "1in",
+                            bottom: "1in",
+                            left: "1in",
+                        },
+                    },
+                },
+                headers: {
+                    default: new Header({
+                        children: [
+                            ...(headerImageData && headerImageData instanceof ArrayBuffer
+                                ? [
+                                      new Paragraph({
+                                          children: [
+                                              new ImageRun({
+                                                  data: headerImageData,
+                                                  transformation: {
+                                                      width: 60,
+                                                      height: 60,
+                                                  },
+                                              } as import("docx").IImageOptions),
+                                          ],
+                                          alignment: AlignmentType.CENTER,
+                                      }),
+                                  ]
+                                : []),
+                            new Paragraph({
+                                children: [
+                                    new TextRun({
+                                        text: `${config.university || ""}`,
+                                        bold: true,
+                                        size: 24,
+                                    }),
+                                ],
+                                alignment: AlignmentType.CENTER,
+                            }),
+                        ],
+                    }),
+                },
+                children,
+            },
+        ],
+    });
+
+    try {
+        const blob = await Packer.toBlob(doc);
+        saveAs(blob, `${filename.replace(/\s+/g, "_")}_Question_Paper.docx`);
+        toast.success("Word document generated successfully!");
+    } catch (error) {
+        console.error("Error generating Word document:", error);
+        toast.error("Failed to generate Word document.");
+    }
+};
   const handleAnswerKeyGenerate = async () => {
     if (!config) return;
 
@@ -249,11 +540,19 @@ const Result = () => {
               <span className="hidden sm:inline">Generate Answer Key</span>
               <span className="sm:hidden">Answer Key</span>
             </Button>
-            <ShareDialog
-              title={config.subjectName}
-              content="Question paper generated successfully"
-            />
-            <Button onClick={handleWordGenerate} variant="outline" size="sm" className="text-xs sm:text-sm">
+            {pdfBlob && (
+              <ShareDialog
+                title={config.subjectName}
+                content="Question paper generated successfully"
+                pdfBlob={pdfBlob}
+              />
+            )}
+            <Button
+              onClick={handleWordGenerate}
+              variant="outline"
+              size="sm"
+              className="text-xs sm:text-sm"
+            >
               <Download className="w-4 h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Word</span>
               <span className="sm:hidden">DOC</span>
@@ -271,7 +570,7 @@ const Result = () => {
           <CardContent ref={paperRef} className="p-4 sm:p-8">
             <EditableQuestionPaper
               config={config}
-              token = {token}
+              token={token}
               onSave={handleQuestionsSave}
             />
           </CardContent>
