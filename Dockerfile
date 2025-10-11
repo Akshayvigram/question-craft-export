@@ -1,33 +1,27 @@
-FROM node:20 as builder 
+FROM node:20 as builder 
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
-
-RUN npm install -g pnpm
+RUN corepack enable pnpm
 
 WORKDIR /app
-
 COPY . /app
-
 RUN pnpm install
+RUN pnpm run build 
 
-RUN pnpm run build 
-
-FROM node:20-alpine 
+FROM node:20-alpine 
 
 ENV NODE_ENV production
-
 ENV PORT 8080
 
-WORKDIR /app 
+WORKDIR /app 
 
-COPY --from=builder /app/dist /app/public 
+RUN corepack enable pnpm
 
 COPY package*.json ./
-
 RUN pnpm install --prod
 
 COPY server.js .
-
 COPY backend/ ./backend/
+COPY --from=builder /app/dist /app/public 
 
 CMD ["node", "server.js"]
