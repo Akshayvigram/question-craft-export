@@ -42,4 +42,4 @@ RUN npm install --only=production
 COPY --from=frontend-builder /app/frontend/dist /app/backend/public 
 
 # Define the command to start your Node.js backend server
-CMD ["node", "backend/server.js"]
+CMD ["node", "server.js"]
