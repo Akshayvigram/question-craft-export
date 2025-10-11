@@ -20,7 +20,7 @@ RUN corepack enable pnpm
 COPY package*.json ./
 RUN pnpm install --prod
 
-COPY server.js .
+COPY backend/server.js .
 COPY backend/ ./backend/
 COPY --from=builder /app/dist /app/public 
 
