@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ArrowLeft, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { LoginSocialGoogle } from 'reactjs-social-login';
-
 import { FcGoogle } from "react-icons/fc";
 
 const Signup = () => {
@@ -70,6 +68,7 @@ const Signup = () => {
         navigate(redirectPath || "/");
       }, 200);
 
+        navigate("/");
       } else {
         toast.error(data.message || "Signup failed. Please try again.");
       }
@@ -89,40 +88,40 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-hero flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-sm sm:max-w-md">
         <div className="text-center mb-8">
           <Link
             to="/"
-            className="inline-flex items-center space-x-2 text-primary hover:text-accent transition-colors"
+            className="flex items-center justify-center space-x-2 text-primary hover:text-accent transition-colors"
           >
             <img
               src="/vinathaal_icon.png"
               alt="Vinathaal Icon"
-              className="w-14 h-14 object-contain"
+              className="w-12 h-12 sm:w-14 sm:h-14 object-contain"
             />
-            <span className="text-2xl font-semibold">Vinathaal</span>
+            <span className="text-xl sm:text-2xl font-semibold">Vinathaal</span>
           </Link>
           <Link
             to="/"
-            className="absolute top-6 left-14 inline-flex items-center space-x-2 text-primary hover:text-accent transition-colors"
+            className="absolute top-4 left-4 sm:left-6 lg:left-8 inline-flex items-center space-x-2 text-primary hover:text-accent transition-colors"
           >
-            <ArrowLeft className="w-6 h-6" />
-            <span className="text-sm">Back to Home</span>
+            <ArrowLeft className="w-5 h-5" />
+            <span className="hidden sm:inline text-sm">Back to Home</span>
           </Link>
         </div>
 
         <Card className="bg-gradient-card border-accent/20 shadow-elegant">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl text-primary">Create Account</CardTitle>
-            <CardDescription className="text-text-secondary">
+            <CardTitle className="text-xl sm:text-2xl text-primary">Create Account</CardTitle>
+            <CardDescription className="text-sm sm:text-base text-text-secondary">
               Join thousands of educators using AI to create better question papers
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name" className="text-sm">Full Name</Label>
                 <Input
                   id="name"
                   type="text"
@@ -133,7 +132,7 @@ const Signup = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-sm">Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -144,7 +143,7 @@ const Signup = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-sm">Password</Label>
                 <Input
                   id="password"
                   type="password"
@@ -155,7 +154,7 @@ const Signup = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword" className="text-sm">Confirm Password</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -175,7 +174,7 @@ const Signup = () => {
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-text-secondary">
+              <p className="text-xs sm:text-sm text-text-secondary">
                 Already have an account?{" "}
                 <Link
                   to="/login"
