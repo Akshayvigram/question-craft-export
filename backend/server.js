@@ -8,16 +8,14 @@ const loadConfig = require('./utils/config');
 const createDbPool = require('./awsdb');      
 const createTransporter = require('./utils/mailer'); 
 const createPerplexityService = require('./services/generateWithPerplexity'); 
-const authRoutes = require('./routes/auth');       // Auth router factory
-const statsRoutes = require('./routes/stats');     // Stats router factory
-const extractRoute = require('./routes/extract');  // Extract router factory
-const generateRoute = require('./routes/generate'); // Generate router factory (descriptive)
-const mcqGenerateRoute = require('./routes/generate-mcq'); // New MCQ router factory
-const answerKeyRoute = require('./routes/generateAnswer'); // Answer Key router factory
-const mcqAnswerKeyRoute = require('./routes/generate-mcq-answer');
-const supportRoute = require('./routes/support'); // Support router factory 
-const slackAlertRoute = require('./routes/slack'); // Slack alert router factory
-const userRoutes = require('./routes/user'); // User management router factory
+const authRoutes = require('./routes/auth');       
+const statsRoutes = require('./routes/stats');     
+const extractRoute = require('./routes/extract');  
+const generateRoute = require('./routes/generate'); 
+const answerKeyRoute = require('./routes/generateAnswer'); 
+const supportRoute = require('./routes/support'); 
+const slackAlertRoute = require('./routes/slack'); 
+const userRoutes = require('./routes/user'); 
 const s3Upload = require('./routes/s3Upload');
 const createTokenAuthMiddleware = require('./utils/middleware'); 
 
@@ -71,10 +69,8 @@ async function startServer() {
     // PROTECTED ROUTES
     app.use(protect);
     app.use('/api', extractRoute);
-    app.use('/api', generateRoute(perplexityService)); // Original descriptive route
-    app.use('/api', mcqGenerateRoute(perplexityService)); // New MCQ route
+    app.use('/api', generateRoute(perplexityService));
     app.use('/api', answerKeyRoute(perplexityService));
-    app.use('/api', mcqAnswerKeyRoute(perplexityService));
     app.use('/api', supportRoute(transporter, config));
     app.use('/api', slackAlertRoute(config));
     app.use('/api/user', userRoutes(db));
@@ -94,8 +90,6 @@ async function startServer() {
     app.listen(PORT, '0.0.0.0', () => { 
       console.log(`✅ Server is running on port ${PORT}`);
       console.log(`📍 Health check available at http://localhost:${PORT}/health`);
-      console.log(`📍 Descriptive questions: http://localhost:${PORT}/api/generate-questions`);
-      console.log(`📍 MCQ questions: http://localhost:${PORT}/api/generate-mcq-questions`);
     });
 
   } catch (error) {
