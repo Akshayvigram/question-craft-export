@@ -59,6 +59,7 @@ const Support = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  // Get user data from localStorage if logged in
   const getUserData = () => {
     try {
       const userData = localStorage.getItem("user");
@@ -79,6 +80,7 @@ const Support = () => {
       message: "",
     },
   });
+
 
   useEffect(() => {
     if (location.hash) {
@@ -137,6 +139,7 @@ const Support = () => {
     }
   };
 
+
   const faqs = [
     {
       question: "How do I generate a question paper using AI?",
@@ -182,7 +185,7 @@ const Support = () => {
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center space-x-2 text-slate-900 hover:text-slate-700">
               <ArrowLeft className="w-5 h-5" />
-              <span className="hidden sm:inline">Back to Home</span>
+              <span>Back to Home</span>
             </Link>
             <div className="flex items-center space-x-2">
               <img
@@ -195,49 +198,32 @@ const Support = () => {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="py-16 sm:py-20">
-        <div className="max-w-xl mx-auto px-4 text-center">
-<h1 className="text-3xl sm:text-5xl font-bold text-foreground mb-4 sm:mb-6 leading-tight whitespace-normal md:whitespace-nowrap">
-  How Can We{" "}
-  <span className="bg-gradient-primary bg-clip-text text-transparent">
-    Help You?
-  </span>
-</h1>
-          <p className="text-base sm:text-xl text-muted-foreground mb-3">
+      <section className="py-20">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h1 className="text-5xl font-bold text-foreground mb-6">
+            How Can We <span className="bg-gradient-primary bg-clip-text text-transparent">Help You?</span>
+          </h1>
+          <p className="text-xl text-muted-foreground mb-3">
             Find answers to common questions or get in touch with our support team
           </p>
         </div>
       </section>
 
-      {/* FAQs Section */}
-      <section className="py-12 sm:py-16 bg-background">
-        <div className="max-w-3xl mx-auto px-4">
-          <div className="text-center mb-10 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2 sm:mb-4">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-sm sm:text-lg text-muted-foreground">
-              Quick answers to common questions about Vinathaal
-            </p>
+      <section className="py-16 bg-background">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground mb-4">Frequently Asked Questions</h2>
+            <p className="text-lg text-muted-foreground">Quick answers to common questions about Vinathaal</p>
           </div>
 
           <Accordion type="single" collapsible className="space-y-4">
             {faqs.map((faq, index) => (
-              <AccordionItem
-                key={index}
-                value={`item-${index}`}
-                className="border border-border rounded-lg px-4 sm:px-6"
-              >
-                <AccordionTrigger className="text-left hover:no-underline py-4 sm:py-6">
-                  <span className="font-semibold text-sm sm:text-base text-foreground">
-                    {faq.question}
-                  </span>
+              <AccordionItem key={index} value={`item-${index}`} className="border border-border rounded-lg px-6">
+                <AccordionTrigger className="text-left hover:no-underline py-6">
+                  <span className="font-semibold text-foreground">{faq.question}</span>
                 </AccordionTrigger>
-                <AccordionContent className="pb-4 sm:pb-6">
-                  <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-                    {faq.answer}
-                  </p>
+                <AccordionContent className="pb-6">
+                  <p className="text-muted-foreground leading-relaxed">{faq.answer}</p>
                 </AccordionContent>
               </AccordionItem>
             ))}
@@ -245,63 +231,48 @@ const Support = () => {
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section id="form" className="py-12 sm:py-16 bg-gradient-subtle">
+      <section id="form" className="py-16 bg-gradient-subtle">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="text-center mb-10 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2 sm:mb-4">
-              Still Need Help?
-            </h2>
-            <p className="text-sm sm:text-lg text-muted-foreground">
-              Send us a message and we'll get back to you promptly
-            </p>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground mb-4">Still Need Help?</h2>
+            <p className="text-lg text-muted-foreground">Send us a message and we'll get back to you promptly</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
+          <div className="grid md:grid-cols-2 gap-8">
             <Card className="bg-gradient-card border-accent/20">
               <CardHeader>
-                <CardTitle className="flex items-center text-primary text-xl sm:text-2xl">
-                  <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+                <CardTitle className="flex items-center text-primary">
+                  <MessageCircle className="w-6 h-6 mr-2" />
                   Get in Touch
                 </CardTitle>
-                <CardDescription className="text-xs sm:text-sm">We're here to help you succeed</CardDescription>
+                <CardDescription>We're here to help you succeed</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4 sm:space-y-6">
+              <CardContent className="space-y-6">
                 <div className="flex items-center space-x-3">
-                  <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
+                  <Mail className="w-5 h-5 text-accent" />
                   <div>
-                    <p className="font-medium text-xs sm:text-sm text-foreground">Email Support</p>
-                    <p className="text-muted-foreground text-xs sm:text-sm">
-                      support@vinathaal.com
-                    </p>
+                    <p className="font-medium text-foreground">Email Support</p>
+                    <p className="text-muted-foreground">support@vinathaal.com</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
+                  <Phone className="w-5 h-5 text-accent" />
                   <div>
-                    <p className="font-medium text-xs sm:text-sm text-foreground">Phone Support</p>
-                    <p className="text-muted-foreground text-xs sm:text-sm">
-                      +1 (555) 123-4567
-                    </p>
+                    <p className="font-medium text-foreground">Phone Support</p>
+                    <p className="text-muted-foreground">+1 (555) 123-4567</p>
                   </div>
                 </div>
-                <div className="bg-accent/10 p-3 sm:p-4 rounded-lg">
-                  <p className="text-xs sm:text-sm text-accent font-medium">Response Time</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    We typically respond within 24 hours
-                  </p>
+                <div className="bg-accent/10 p-4 rounded-lg">
+                  <p className="text-sm text-accent font-medium">Response Time</p>
+                  <p className="text-sm text-muted-foreground">We typically respond within 24 hours</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="bg-gradient-card border-accent/20">
               <CardHeader>
-                <CardTitle className="text-primary text-xl sm:text-2xl">
-                  Send us a Message
-                </CardTitle>
-                <CardDescription className="text-xs sm:text-sm">
-                  Fill out the form below and we'll get back to you
-                </CardDescription>
+                <CardTitle className="text-primary">Send us a Message</CardTitle>
+                <CardDescription>Fill out the form below and we'll get back to you</CardDescription>
               </CardHeader>
               <CardContent>
                 <Form {...form}>
@@ -311,7 +282,7 @@ const Support = () => {
                       name="fullName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm">Full Name</FormLabel>
+                          <FormLabel>Full Name</FormLabel>
                           <FormControl>
                             <Input placeholder="Enter your full name" {...field} />
                           </FormControl>
@@ -325,7 +296,7 @@ const Support = () => {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm">Email Address</FormLabel>
+                          <FormLabel>Email Address</FormLabel>
                           <FormControl>
                             <Input type="email" placeholder="Enter your email" {...field} />
                           </FormControl>
@@ -339,7 +310,7 @@ const Support = () => {
                       name="subject"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm">Purpose</FormLabel>
+                          <FormLabel>Purpose</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
@@ -362,7 +333,7 @@ const Support = () => {
                       name="message"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm">Message</FormLabel>
+                          <FormLabel>Message</FormLabel>
                           <FormControl>
                             <Textarea
                               placeholder="Tell us how we can help you..."

@@ -3,14 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Plus, Trash2, FileText, Image, Settings, Wand2, Brain, Scale, File, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { S3Upload } from "@/utils/S3Uploads";
-import Footer from "@/components/Footer"; // Assuming Footer is imported here
 
 interface QuestionConfig {
   id: string;
@@ -128,7 +127,7 @@ const Generator = () => {
       const res = await fetch("https://vinathaal.azhizen.com/api/extract-syllabus", {
         method: "POST",
         headers: {
-          'Authorization': `Bearer ${api_token}`
+          'Authorization': `Bearer ${api_token}` 
         },
         body: formData,
       });
@@ -490,8 +489,6 @@ const Generator = () => {
         const array = new Uint32Array(1);
         crypto.getRandomValues(array);
         const token = array[0].toString(36);
-        console.log(token);
-
 
         sessionStorage.setItem("token", token);
         sessionStorage.setItem("shouldUploadOnce", "true");
@@ -542,31 +539,30 @@ const Generator = () => {
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center space-x-2 text-slate-900 hover:text-slate-700">
               <ArrowLeft className="w-5 h-5" />
-              <span className="hidden sm:inline">Back to Home</span>
+              <span>Back to Home</span>
             </Link>
             <div className="flex items-center space-x-2">
               <img
                 src="/vinathaal%20logo.png"
                 alt="Vinathaal Logo"
-                className="h-12 sm:h-16 w-auto object-contain"
+                className="h-16 w-auto object-contain"
               />
             </div>
           </div>
         </div>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="bg-gradient-card border-accent/20">
-            <CardHeader className="text-center p-4 sm:p-6">
-              <CardTitle className="flex items-center justify-center space-x-2 text-primary text-lg sm:text-xl">
+            <CardHeader className="text-center">
+              <CardTitle className="flex items-center justify-center space-x-2 text-primary">
                 <FileText className="w-5 h-5" />
                 <span>Upload Syllabus</span>
               </CardTitle>
-              <CardDescription className="text-xs sm:text-sm text-text-secondary">Upload your course materials to be analyzed by AI.</CardDescription>
             </CardHeader>
-            <CardContent className="p-4 sm:p-6">
-              <div className="border-2 border-dashed border-primary/30 rounded-lg p-6 sm:p-8 text-center hover:border-primary/50 transition-colors cursor-pointer bg-gradient-subtle">
+            <CardContent>
+              <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer bg-gradient-subtle">
                 <input
                   type="file"
                   accept=".pdf,.doc,.docx,.txt,.jpeg,.jpg"
@@ -574,43 +570,34 @@ const Generator = () => {
                   className="hidden"
                   id="syllabus-upload"
                 />
-                <label htmlFor="syllabus-upload" className="cursor-pointer block">
+                <label htmlFor="syllabus-upload" className="cursor-pointer">
                   {syllabusFile ? (
                     <div className="space-y-4">
-                      <FileText className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-accent" />
-                      <p className="text-success font-medium text-sm sm:text-base">Syllabus uploaded: {syllabusFile.name}</p>
-                      <p className="text-xs sm:text-sm text-text-secondary">AI will generate questions based on your syllabus</p>
+                      <FileText className="w-12 h-12 mx-auto text-accent" />
+                      <p className="text-success font-medium">Syllabus uploaded: {syllabusFile.name}</p>
+                      <p className="text-sm text-text-secondary">AI will generate questions based on your syllabus</p>
                     </div>
                   ) : (
                     <>
-                      <FileText className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-accent mb-4" />
-                      <p className="text-text-primary font-medium text-sm sm:text-base">Click to upload your syllabus</p>
-                      <p className="text-xs sm:text-sm text-text-secondary mt-2">PDF, DOC, DOCX, TXT, JPG, JPEG up to 10MB</p>
+                      <FileText className="w-12 h-12 mx-auto text-accent mb-4" />
+                      <p className="text-text-primary font-medium">Click to upload your syllabus</p>
+                      <p className="text-sm text-text-secondary mt-2">PDF, DOC, DOCX, TXT, JPG, JPEG up to 10MB</p>
                     </>
                   )}
                 </label>
               </div>
-              {/* <div className="mt-4">
-                <Textarea 
-                  placeholder="Paste your syllabus text here if you prefer not to upload a file..."
-                  value={syllabusText}
-                  onChange={(e) => setSyllabusText(e.target.value)}
-                  className="min-h-[100px] text-xs sm:text-sm"
-                />
-              </div> */}
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-card border-accent/20">
-            <CardHeader className="text-center p-4 sm:p-6">
-              <CardTitle className="flex items-center justify-center space-x-2 text-primary text-lg sm:text-xl">
+            <CardHeader className="text-center">
+              <CardTitle className="flex items-center justify-center space-x-2 text-primary">
                 <Image className="w-5 h-5" />
-                <span>Upload Header (Optional)</span>
+                <span>Upload Header Image (Optional)</span>
               </CardTitle>
-              <CardDescription className="text-xs sm:text-sm text-text-secondary">Upload your institution logo or custom header.</CardDescription>
             </CardHeader>
-            <CardContent className="p-4 sm:p-6">
-              <div className="border-2 border-dashed border-primary/30 rounded-lg p-6 sm:p-8 text-center hover:border-primary/50 transition-colors cursor-pointer bg-gradient-subtle">
+            <CardContent>
+              <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer bg-gradient-subtle">
                 <input
                   type="file"
                   accept="image/*"
@@ -618,17 +605,17 @@ const Generator = () => {
                   className="hidden"
                   id="header-upload"
                 />
-                <label htmlFor="header-upload" className="cursor-pointer block">
+                <label htmlFor="header-upload" className="cursor-pointer">
                   {headerImage ? (
                     <div className="space-y-4">
-                      <img src={headerImage} alt="Header preview" className="max-h-24 sm:max-h-32 mx-auto rounded-lg shadow-md" />
-                      <p className="text-success font-medium text-sm sm:text-base">Header image uploaded successfully!</p>
+                      <img src={headerImage} alt="Header preview" className="max-h-32 mx-auto rounded-lg shadow-md" />
+                      <p className="text-success font-medium">Header image uploaded successfully!</p>
                     </div>
                   ) : (
                     <>
-                      <Image className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-accent mb-4" />
-                      <p className="text-text-primary font-medium text-sm sm:text-base">Click to upload your university/institution header</p>
-                      <p className="text-xs sm:text-sm text-text-secondary mt-2">PNG, JPG up to 10MB</p>
+                      <Image className="w-12 h-12 mx-auto text-accent mb-4" />
+                      <p className="text-text-primary font-medium">Click to upload your university/institution header</p>
+                      <p className="text-sm text-text-secondary mt-2">PNG, JPG up to 10MB</p>
                     </>
                   )}
                 </label>
@@ -638,67 +625,64 @@ const Generator = () => {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 mb-8">
+      <div className="max-w-4xl mx-auto mb-8">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
-              <Settings className="w-5 h-5" />
+            <CardTitle className="flex items-center space-x-2">
+              <FileText className="w-5 h-5" />
               <span>Configure Question Paper</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="university" className="text-sm">University/Institution</Label>
+                <Label htmlFor="university">University/Institution</Label>
                 <Input
                   id="university"
                   placeholder="e.g., Anna University"
                   value={university}
                   onChange={(e) => setUniversity(e.target.value)}
-                  className="text-sm"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="subject" className="text-sm">Subject Name</Label>
+                <Label htmlFor="subject">Subject Name</Label>
                 <Input
                   id="subject"
                   placeholder="e.g., MATRICES AND CALCULUS"
                   value={subjectName}
                   onChange={(e) => setSubjectName(e.target.value)}
                   readOnly={isSubjectLocked}
-                  className={`text-sm ${isSubjectLocked ? "cursor-not-allowed bg-muted text-muted-foreground" : ""}`}
+                  className={isSubjectLocked ? "cursor-not-allowed bg-muted text-muted-foreground" : ""}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="date" className="text-sm">Exam Date</Label>
+                <Label htmlFor="date">Exam Date</Label>
                 <Input
                   id="date"
                   type="date"
                   value={examDate}
                   onChange={(e) => setExamDate(e.target.value)}
-                  className="text-sm"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="duration" className="text-sm">Duration</Label>
+                <Label htmlFor="duration">Duration</Label>
                 <Input
                   id="duration"
                   placeholder="e.g., 3 Hours"
                   value={duration}
                   onChange={(e) => setDuration(e.target.value)}
-                  className="text-sm"
                 />
               </div>
             </div>
 
             <div>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
-                <h3 className="text-base sm:text-lg font-semibold">Sections Configuration</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Sections Configuration</h3>
                 <div className="flex items-center space-x-4">
                   <span className="text-sm text-success font-medium">
                     Total Marks: {totalMarks}
                   </span>
-                  <Button onClick={addSection} size="sm" variant="outline" className="text-sm">
+                  <Button onClick={addSection} size="sm" variant="outline">
                     <Plus className="w-4 h-4 mr-2" />
                     Add Section
                   </Button>
@@ -707,15 +691,15 @@ const Generator = () => {
 
               <div className="space-y-6">
                 {sections.map((section, index) => (
-                  <div key={section.id} className="border border-border rounded-lg p-4 sm:p-6">
+                  <div key={section.id} className="border border-border rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="font-medium text-base">{section.name} Configuration</h4>
+                      <h4 className="font-medium">Section Configuration</h4>
                       {sections.length > 1 && (
                         <Button
                           onClick={() => removeSection(section.id)}
                           size="sm"
                           variant="outline"
-                          className="text-red-600 hover:text-red-700 p-2 h-auto"
+                          className="text-red-600 hover:text-red-700"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -724,12 +708,11 @@ const Generator = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                       <div>
-                        <Label className="text-sm">Section Name</Label>
+                        <Label>Section Name</Label>
                         <Input
                           value={section.name}
                           onChange={(e) => updateSection(section.id, 'name', e.target.value)}
                           placeholder="Section A"
-                          className="text-sm"
                         />
                       </div>
                       <div className="flex items-center space-x-2">
@@ -745,44 +728,42 @@ const Generator = () => {
 
                     {section.isAutoGenerate ? (
                       <div className="space-y-4 bg-gradient-hero p-4 rounded-lg border border-accent/20">
-                        <h5 className="font-medium text-foreground flex items-center text-sm sm:text-base">
+                        <h5 className="font-medium text-foreground flex items-center">
                           <Wand2 className="w-4 h-4 mr-2 text-accent" />
                           Bulk AI Generation Settings
                         </h5>
-                        <p className="text-xs text-muted-foreground">Configure common settings for all questions in this section</p>
+                        <p className="text-sm text-muted-foreground">Configure common settings for all questions in this section</p>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           <div>
-                            <Label className="text-xs">Questions</Label>
+                            <Label>Number of Questions</Label>
                             <Input
                               type="number"
                               value={section.autoConfig.questionCount}
                               onChange={(e) => updateAutoConfig(section.id, 'questionCount', parseInt(e.target.value) || 1)}
                               min="1"
                               max="20"
-                              className="text-sm"
                             />
                           </div>
 
                           <div>
-                            <Label className="text-xs">Marks/Q</Label>
+                            <Label>Marks per Question</Label>
                             <Input
                               type="number"
                               value={section.autoConfig.marksPerQuestion}
                               onChange={(e) => updateAutoConfig(section.id, 'marksPerQuestion', parseInt(e.target.value) || 1)}
                               min="1"
                               max="20"
-                              className="text-sm"
                             />
                           </div>
 
                           <div>
-                            <Label className="text-xs">Difficulty</Label>
+                            <Label>Difficulty Level</Label>
                             <Select
                               value={section.autoConfig.difficulty}
                               onValueChange={(value) => updateAutoConfig(section.id, 'difficulty', value)}
                             >
-                              <SelectTrigger className="text-sm">
+                              <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -794,20 +775,19 @@ const Generator = () => {
                           </div>
 
                           <div>
-                            <Label className="text-xs">Sub-Q/Q</Label>
+                            <Label>Sub-questions per Question</Label>
                             <Input
                               type="number"
                               value={section.autoConfig.subQuestionsCount}
                               onChange={(e) => updateAutoConfig(section.id, 'subQuestionsCount', parseInt(e.target.value) || 0)}
                               min="0"
                               max="5"
-                              className="text-sm"
                             />
                           </div>
                         </div>
 
                         <div>
-                          <Label className="text-sm">Units to Include</Label>
+                          <Label>Units to Include</Label>
                           <div className="flex flex-wrap gap-2 mt-2">
                             {units.map((unit) => (
                               <Button
@@ -815,7 +795,7 @@ const Generator = () => {
                                 onClick={() => toggleAutoUnit(section.id, unit)}
                                 variant={section.autoConfig.units.includes(unit) ? "default" : "outline"}
                                 size="sm"
-                                className={`text-xs h-8 ${section.autoConfig.units.includes(unit) ? "bg-primary" : ""}`}
+                                className={section.autoConfig.units.includes(unit) ? "bg-primary" : ""}
                               >
                                 {unit}
                               </Button>
@@ -825,15 +805,15 @@ const Generator = () => {
                       </div>
                     ) : (
                       <div className="space-y-4 bg-gradient-hero p-4 rounded-lg border border-accent/20">
-                        <h5 className="font-medium text-foreground flex items-center text-sm sm:text-base">
+                        <h5 className="font-medium text-foreground flex items-center">
                           <Brain className="w-4 h-4 mr-2 text-accent" />
                           Individual Question Configuration
                         </h5>
-                        <p className="text-xs text-muted-foreground">Specify how many AI and manual questions you need, then configure each one individually</p>
+                        <p className="text-sm text-muted-foreground">Specify how many AI and manual questions you need, then configure each one individually</p>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-card/50 p-4 rounded-lg">
                           <div>
-                            <Label className="text-xs">AI Questions</Label>
+                            <Label>AI Questions</Label>
                             <Input
                               type="number"
                               value={section.individualConfig.aiQuestionCount}
@@ -841,12 +821,11 @@ const Generator = () => {
                               min="0"
                               max="20"
                               placeholder="0"
-                              className="text-sm"
                             />
                           </div>
 
                           <div>
-                            <Label className="text-xs">Manual Questions</Label>
+                            <Label>Manual Questions</Label>
                             <Input
                               type="number"
                               value={section.individualConfig.manualQuestionCount}
@@ -854,29 +833,27 @@ const Generator = () => {
                               min="0"
                               max="20"
                               placeholder="0"
-                              className="text-sm"
                             />
                           </div>
 
                           <div>
-                            <Label className="text-xs">Default Marks</Label>
+                            <Label>Default Marks</Label>
                             <Input
                               type="number"
                               value={section.individualConfig.defaultMarks}
                               onChange={(e) => updateIndividualConfig(section.id, 'defaultMarks', parseInt(e.target.value) || 1)}
                               min="1"
                               max="20"
-                              className="text-sm"
                             />
                           </div>
 
                           <div>
-                            <Label className="text-xs">Default Difficulty</Label>
+                            <Label>Default Difficulty</Label>
                             <Select
                               value={section.individualConfig.defaultDifficulty}
                               onValueChange={(value) => updateIndividualConfig(section.id, 'defaultDifficulty', value)}
                             >
-                              <SelectTrigger className="text-sm">
+                              <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -886,16 +863,14 @@ const Generator = () => {
                               </SelectContent>
                             </Select>
                           </div>
-                        </div>
 
-                        <div className="grid grid-cols-2 gap-4 bg-card/50 p-4 rounded-lg">
                           <div>
-                            <Label className="text-xs">Default Unit</Label>
+                            <Label>Default Unit</Label>
                             <Select
                               value={section.individualConfig.defaultUnit}
                               onValueChange={(value) => updateIndividualConfig(section.id, 'defaultUnit', value)}
                             >
-                              <SelectTrigger className="text-sm">
+                              <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -907,23 +882,22 @@ const Generator = () => {
                           </div>
 
                           <div>
-                            <Label className="text-xs">Default Sub-questions</Label>
+                            <Label>Default Sub-questions</Label>
                             <Input
                               type="number"
                               value={section.individualConfig.defaultSubQuestionsCount}
                               onChange={(e) => updateIndividualConfig(section.id, 'defaultSubQuestionsCount', parseInt(e.target.value) || 0)}
                               min="0"
                               max="5"
-                              className="text-sm"
                             />
                           </div>
                         </div>
 
                         {section.questions.length === 0 ? (
                           <div className="text-center py-8 text-muted-foreground bg-card/30 rounded-lg">
-                            <Brain className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-muted-foreground mb-4" />
-                            <p className="mb-2 text-sm">Set AI and Manual question counts above</p>
-                            <p className="text-xs">Questions will appear automatically for individual configuration</p>
+                            <Brain className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                            <p className="mb-2">Set AI and Manual question counts above</p>
+                            <p className="text-sm">Questions will appear automatically for individual configuration</p>
                           </div>
                         ) : (
                           <div className="bg-card/30 p-3 rounded-lg">
@@ -946,7 +920,7 @@ const Generator = () => {
                                   onClick={() => removeQuestion(section.id, question.id)}
                                   size="sm"
                                   variant="ghost"
-                                  className="text-red-600 hover:text-red-700 p-2 h-auto"
+                                  className="text-red-600 hover:text-red-700"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
@@ -955,36 +929,34 @@ const Generator = () => {
                               <div className="space-y-4">
                                 {!question.isAIGenerated && (
                                   <div>
-                                    <Label className="text-xs">Question Text</Label>
+                                    <Label>Question Text</Label>
                                     <Textarea
                                       value={question.text || ""}
                                       onChange={(e) => updateQuestion(section.id, question.id, 'text', e.target.value)}
                                       placeholder="Enter your question here..."
-                                      className="min-h-[60px] sm:min-h-[80px] text-sm"
+                                      className="min-h-[80px]"
                                     />
                                   </div>
                                 )}
 
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                   <div>
-                                    <Label className="text-xs">Marks</Label>
+                                    <Label>Marks</Label>
                                     <Input
                                       type="number"
                                       value={question.marks}
                                       onChange={(e) => updateQuestion(section.id, question.id, 'marks', parseInt(e.target.value) || 1)}
                                       min="1"
-                                      max="20"
-                                      className="text-sm"
                                     />
                                   </div>
 
                                   <div>
-                                    <Label className="text-xs">Difficulty</Label>
+                                    <Label>Difficulty</Label>
                                     <Select
                                       value={question.difficulty}
                                       onValueChange={(value) => updateQuestion(section.id, question.id, 'difficulty', value)}
                                     >
-                                      <SelectTrigger className="text-sm">
+                                      <SelectTrigger>
                                         <SelectValue />
                                       </SelectTrigger>
                                       <SelectContent>
@@ -996,12 +968,12 @@ const Generator = () => {
                                   </div>
 
                                   <div>
-                                    <Label className="text-xs">Unit</Label>
+                                    <Label>Unit</Label>
                                     <Select
                                       value={question.unit}
                                       onValueChange={(value) => updateQuestion(section.id, question.id, 'unit', value)}
                                     >
-                                      <SelectTrigger className="text-sm">
+                                      <SelectTrigger>
                                         <SelectValue />
                                       </SelectTrigger>
                                       <SelectContent>
@@ -1013,21 +985,20 @@ const Generator = () => {
                                   </div>
 
                                   <div>
-                                    <Label className="text-xs">Sub-questions</Label>
+                                    <Label>Sub-questions</Label>
                                     <Input
                                       type="number"
                                       value={question.subQuestionsCount}
                                       onChange={(e) => updateQuestion(section.id, question.id, 'subQuestionsCount', parseInt(e.target.value) || 0)}
                                       min="0"
                                       max="5"
-                                      className="text-sm"
                                     />
                                   </div>
                                 </div>
 
                                 {question.isAIGenerated && (
-                                  <div className="bg-card p-3 rounded border border-accent/30 mt-3">
-                                    <p className="text-xs text-accent">
+                                  <div className="bg-card p-3 rounded border border-accent/30">
+                                    <p className="text-sm text-accent">
                                       🎯 <strong>AI will generate:</strong> A {question.difficulty.toLowerCase()} level question from {question.unit}
                                       worth {question.marks} marks
                                       {question.subQuestionsCount > 0 && ` with ${question.subQuestionsCount} sub-questions`}
@@ -1084,7 +1055,6 @@ const Generator = () => {
           </div>
         )}
       </div>
-      <Footer />
     </div>
   );
 };

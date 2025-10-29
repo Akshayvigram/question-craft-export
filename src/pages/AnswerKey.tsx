@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Download, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import ShareDialog from "@/components/ShareDialog";
-import { generatePDF, generateDocx } from "@/utils/pdfGenerator";
+import { generatePDF, /*generateWordDocument */} from "@/utils/pdfGenerator";
 import html2pdf from 'html2pdf.js';
 
 interface AnswerKeyItem {
@@ -55,11 +55,11 @@ const AnswerKey = () => {
     toast.success("Answer key PDF exported successfully!");
   };
 
-  const handleWordGenerate = () => {
-    const filename = `${config?.subjectName || 'question-paper'}-answer-key`;
-    generateDocx('answer-key-content', filename);
-    toast.success("Answer key Word document downloaded successfully!");
-  };
+  // const handleWordGenerate = () => {
+  //   const filename = `${config?.subjectName || 'question-paper'}-answer-key`;
+  //   generateWordDocument('answer-key-content', filename);
+  //   toast.success("Answer key Word document downloaded successfully!");
+  // };
 
   const handleDownload = () => {
     const element = paperRef.current;
@@ -82,6 +82,7 @@ const AnswerKey = () => {
       </div>
     );
   }
+  
 
   if (!config || answerKey.length === 0) {
     return (
@@ -102,23 +103,20 @@ const AnswerKey = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
       {/* Top Navigation */}
-      <nav className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-10">
+      <nav className="bg-white/80 backdrop-blur-lg border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link
               to="/result"
-              className="flex items-center space-x-2 text-slate-900 hover:text-slate-700 transition-colors"
+              className="flex items-center space-x-2 text-foreground hover:text-primary transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
               <span className="hidden sm:inline">Back to Question Paper</span>
               <span className="sm:hidden">Back</span>
             </Link>
-            <div className="flex items-center space-x-2">
-              <img
-                src="/vinathaal%20logo.png"
-                alt="Vinathaal Logo"
-                className="h-16 w-auto object-contain"
-              />
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+              <Share2 className="w-5 h-5" />
+              <span className="hidden sm:inline">Answer Key</span>
             </div>
           </div>
         </div>
@@ -134,7 +132,7 @@ const AnswerKey = () => {
               title={`${config.subjectName} - Answer Key`}
               content="Answer key generated successfully"
             />
-            <Button onClick={handleWordGenerate} variant="outline" size="sm">
+            <Button onClick={/*handleWordGenerate*/ null} variant="outline" size="sm">
               <Download className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Word</span>
               <span className="sm:hidden">DOC</span>

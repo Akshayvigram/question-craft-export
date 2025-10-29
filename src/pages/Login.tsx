@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ const Login = () => {
       if (res.ok) {
         toast.success("Login successful! Welcome back.");
 
+        // Store user data in localStorage for persistence
         const userData = {
           name: data.user?.name || email.split('@')[0],
           email: email,
@@ -74,67 +76,41 @@ const Login = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-sm sm:max-w-md">
+    <div className="min-h-screen bg-gradient-hero flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link
-            to="/"
-            className="flex items-center justify-center space-x-2 text-primary hover:text-accent transition-colors"
-          >
-            <img
-              src="/vinathaal_icon.png"
-              alt="Vinathaal Icon"
-              className="w-12 h-12 sm:w-14 sm:h-14 object-contain"
-            />
-            <span className="text-xl sm:text-2xl font-semibold">Vinathaal</span>
+          <Link to="/" className="inline-flex items-center space-x-2 text-primary hover:text-accent">
+            <img src="/vinathaal_icon.png" alt="Vinathaal Icon" className="w-14 h-14 object-contain" />
+            <span className="text-2xl font-semibold">Vinathaal</span>
           </Link>
-          <Link
-            to="/"
-            className="absolute top-4 left-4 sm:left-6 lg:left-8 inline-flex items-center space-x-2 text-primary hover:text-accent transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="hidden sm:inline text-sm">Back to Home</span>
+          <Link to="/" className="absolute top-6 left-14 flex items-center text-primary hover:text-accent">
+            <ArrowLeft className="w-6 h-6" />
+            <span className="text-sm">Back to Home</span>
           </Link>
         </div>
 
         <Card className="bg-gradient-card border-accent/20 shadow-elegant">
           <CardHeader className="text-center">
-            <CardTitle className="text-xl sm:text-2xl text-primary">Welcome Back</CardTitle>
-            <CardDescription className="text-sm sm:text-base text-text-secondary">
-              Sign in to your account to continue creating question papers
-            </CardDescription>
+            <CardTitle className="text-2xl text-primary">Welcome Back</CardTitle>
+            <CardDescription>Sign in to your account</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
               </div>
               <Button type="submit" className="w-full bg-gradient-primary" disabled={isLoading}>
                 {isLoading ? "Signing In..." : "Sign In"}
               </Button>
             </form>
 
-            <div className="mt-6 text-center space-y-2">
-              <p className="text-xs sm:text-sm text-text-secondary">
+            <div className="mt-6 text-center">
+              <p className="text-sm text-text-secondary">
                 Don't have an account?{" "}
                 <Link
                   to="/signup"
@@ -143,7 +119,7 @@ const Login = () => {
                   Sign up
                 </Link>
               </p>
-              <p className="text-xs sm:text-sm text-text-secondary">
+              <p className="text-sm text-text-secondary mt-2">
                 <Link
                   to="/forgot-password"
                   className="text-primary hover:text-accent font-medium"
