@@ -79,7 +79,7 @@ const Profile = () => {
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center space-x-2 text-slate-900 hover:text-slate-700">
               <ArrowLeft className="w-5 h-5" />
-              <span>Back to Home</span>
+              <span className="hidden sm:inline">Back to Home</span>
             </Link>
             <div className="flex items-center space-x-2">
               <img
@@ -93,12 +93,12 @@ const Profile = () => {
       </nav>
 
       {/* Main Content */}
-      <div className="min-h-screen bg-background p-8">
-        <div className="max-w-4xl mx-auto space-y-8">
+      <div className="min-h-screen bg-background p-4 sm:p-8">
+        <div className="max-w-xl mx-auto space-y-8">
           {/* Header section with profile picture */}
           <div className="flex flex-col items-center text-center space-y-4">
             {/* Profile picture section */}
-            <div className="relative w-20 h-20">
+            <div className="relative w-24 h-24 sm:w-32 sm:h-32">
               {profilePicture ? (
                 <img
                   src={profilePicture}
@@ -106,7 +106,7 @@ const Profile = () => {
                   className="w-full h-full rounded-full object-cover border-2 border-blue-600"
                 />
               ) : (
-                <div className="w-full h-full rounded-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-500 text-white text-4xl font-bold shadow-md">
+                <div className="w-full h-full rounded-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-500 text-white text-5xl sm:text-6xl font-bold shadow-md">
                   {user?.name?.charAt(0).toUpperCase() || "?"}
                 </div>
               )}
@@ -125,21 +125,23 @@ const Profile = () => {
 
             {/* Heading and Description */}
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">My Profile</h1>
-              <p className="text-gray-500 text-lg mt-2">Manage your personal information and account settings</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">My Profile</h1>
+              <p className="text-sm sm:text-lg text-gray-500 mt-1 sm:mt-2">
+                Manage your personal information and account settings
+              </p>
             </div>
           </div>
 
           {/* User Info Card */}
           <Card className="p-6 border border-border rounded-xl bg-gradient-to-br from-white to-gray-50 text-left">
-            <CardHeader className="flex flex-row items-center justify-between p-0 mb-4">
-              <CardTitle className="text-2xl font-semibold text-gray-800">
+            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-0 mb-4">
+              <CardTitle className="text-xl sm:text-2xl font-semibold text-gray-800">
                 User Information
               </CardTitle>
               <Button
                 variant="outline"
                 onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
-                className="border-2 border-blue-600 text-blue-600 hover:bg-gradient-primary text-sm transition-all text-foreground"
+                className="w-full mt-4 sm:w-auto sm:mt-0 border-2 border-blue-600 text-blue-600 hover:bg-gradient-primary text-sm transition-all text-foreground"
               >
                 {isEditing ? (
                   <>
@@ -154,11 +156,11 @@ const Profile = () => {
             </CardHeader>
             <CardContent className="p-0 space-y-6">
               {/* Name */}
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-primary rounded-lg">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="p-3 bg-gradient-primary rounded-lg flex-shrink-0">
                   <User className="w-6 h-6 text-white" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 w-full">
                   <label className="block text-sm text-muted-foreground mb-1">
                     Name
                   </label>
@@ -167,24 +169,24 @@ const Profile = () => {
                       name="name"
                       value={editedUser?.name || ""}
                       onChange={handleInputChange}
-                      className="w-full text-lg"
+                      className="w-full text-base sm:text-lg"
                     />
                   ) : (
-                    <p className="text-lg font-medium">{user.name || "N/A"}</p>
+                    <p className="text-base sm:text-lg font-medium">{user.name || "N/A"}</p>
                   )}
                 </div>
               </div>
 
               {/* Email */}
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-primary rounded-lg">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="p-3 bg-gradient-primary rounded-lg flex-shrink-0">
                   <Mail className="w-6 h-6 text-white" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 w-full">
                   <label className="block text-sm text-muted-foreground mb-1">
                     Email
                   </label>
-                  <p className="text-lg font-medium">{user.email || "N/A"}</p>
+                  <p className="text-base sm:text-lg font-medium">{user.email || "N/A"}</p>
                   <span className="text-xs text-muted-foreground italic">
                     Email cannot be changed
                   </span>
@@ -192,11 +194,11 @@ const Profile = () => {
               </div>
 
               {/* University */}
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-primary rounded-lg">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="p-3 bg-gradient-primary rounded-lg flex-shrink-0">
                   <GraduationCap className="w-6 h-6 text-white" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 w-full">
                   <label className="block text-sm text-muted-foreground mb-1">
                     University / College
                   </label>
@@ -205,10 +207,10 @@ const Profile = () => {
                       name="university"
                       value={editedUser?.university || ""}
                       onChange={handleInputChange}
-                      className="w-full text-lg"
+                      className="w-full text-base sm:text-lg"
                     />
                   ) : (
-                    <p className="text-lg font-medium">
+                    <p className="text-base sm:text-lg font-medium">
                       {user.university || "Not Provided"}
                     </p>
                   )}
@@ -220,12 +222,12 @@ const Profile = () => {
           {/* Credits Usage Card */}
           <Card className="p-6 border border-border rounded-xl text-left">
             <CardHeader className="p-0 mb-4">
-              <CardTitle className="text-2xl font-semibold text-gray-800">
+              <CardTitle className="text-xl sm:text-2xl font-semibold text-gray-800">
                 Credits Usage
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="bg-blue-50 p-4 rounded-lg text-center">
                   <Coins className="w-6 h-6 mx-auto text-blue-600 mb-2" />
                   <p className="text-sm text-gray-500">Total Used</p>
