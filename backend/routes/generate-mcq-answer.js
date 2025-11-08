@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 module.exports = function createMCQAnswerKeyRoute(perplexityService) {
-  // Route for MCQ Answer Key
+  
   router.post("/generate-mcq-answer-key", async (req, res) => {
     const { questions, subjectName, quizTitle } = req.body;
 

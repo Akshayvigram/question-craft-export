@@ -36,7 +36,7 @@ const Signup = () => {
     setIsLoading(true);
 
     try {
-      const res = await fetch("https://vinathaal.azhizen.com/api/auth/signup", {
+      const res = await fetch("https://vinathaal-backend-905806810470.asia-south1.run.app/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -201,7 +201,7 @@ const Signup = () => {
 
                     setIsLoading(true);
 
-                    const res = await fetch("https://vinathaal.azhizen.com/api/auth/google-signup", {
+                    const res = await fetch("https://vinathaal-backend-905806810470.asia-south1.run.app/api/auth/google-signup", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ token }),

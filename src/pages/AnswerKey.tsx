@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Download, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import ShareDialog from "@/components/ShareDialog";
-import { generatePDF, generateDocx } from "@/utils/pdfGenerator";
+import { generatePDF } from "@/utils/pdfGenerator";
 import html2pdf from 'html2pdf.js';
 
 interface AnswerKeyItem {
@@ -57,7 +57,7 @@ const AnswerKey = () => {
 
   const handleWordGenerate = () => {
     const filename = `${config?.subjectName || 'question-paper'}-answer-key`;
-    generateDocx('answer-key-content', filename);
+    // generateDocx('answer-key-content', filename);
     toast.success("Answer key Word document downloaded successfully!");
   };
 

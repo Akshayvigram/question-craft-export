@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Download, FileKey } from "lucide-react";
 import { toast } from "sonner";
 import html2pdf from 'html2pdf.js';
-import { generateDocx } from "@/utils/pdfGenerator";
+// import { generateDocx } from "@/utils/pdfGenerator";
 import { S3Upload } from "@/utils/S3Uploads";
 import ShareDialog from "@/components/ShareDialog";
 import EditableQuestionPaper from "@/components/EditableQuestionPaper";
@@ -168,7 +168,7 @@ const MCQResultPage = () => {
     }
     const filename = `${config.subjectName.replace(/\s+/g, '_')}_Quiz.docx`;
     try {
-      generateDocx('quiz-content', filename);
+      // generateDocx('quiz-content', filename);
       toast.success("Word document downloaded successfully!");
     } catch (err) {
       console.error("Error generating Word document:", err);
@@ -239,7 +239,7 @@ const MCQResultPage = () => {
 
       console.log("Sending questions for answer key:", questions);
 
-      const response = await fetch('https://vinathaal.azhizen.com/api/generate-mcq-answer-key', {
+      const response = await fetch('https://vinathaal-backend-905806810470.asia-south1.run.app/api/generate-mcq-answer-key', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

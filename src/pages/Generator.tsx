@@ -125,7 +125,7 @@ const Generator = () => {
     formData.append("image", file);
 
     try {
-      const res = await fetch("https://vinathaal.azhizen.com/api/extract-syllabus", {
+      const res = await fetch("https://vinathaal-backend-905806810470.asia-south1.run.app/api/extract-syllabus", {
         method: "POST",
         headers: {
           'Authorization': `Bearer ${api_token}`
@@ -403,7 +403,7 @@ const Generator = () => {
 
     try {
       // ✅ 1. Check credits immediately
-      const creditsRes = await fetch("https://vinathaal.azhizen.com/api/get-credits", {
+      const creditsRes = await fetch("https://vinathaal-backend-905806810470.asia-south1.run.app/api/get-credits", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -463,7 +463,7 @@ const Generator = () => {
       console.log("Sending corrected payload:", JSON.stringify(payload, null, 2));
 
       // ✅ 5. Call generate API
-      const res = await fetch("https://vinathaal.azhizen.com/api/generate-questions", {
+      const res = await fetch("https://vinathaal-backend-905806810470.asia-south1.run.app/api/generate-questions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -500,7 +500,7 @@ const Generator = () => {
 
         // ✅ 6. Deduct credits only on success
         try {
-          const deductRes = await fetch("https://vinathaal.azhizen.com/api/deduct-credits", {
+          const deductRes = await fetch("https://vinathaal-backend-905806810470.asia-south1.run.app/api/deduct-credits", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

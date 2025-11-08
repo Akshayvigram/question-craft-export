@@ -16,7 +16,7 @@ const DashboardStats = () => {
     // Prevent fetching on non-browser environments if this component is used in SSR
     if (typeof window === "undefined") return;
 
-    fetch("https://vinathaal.azhizen.com/api/stats")
+    fetch("https://vinathaal-backend-905806810470.asia-south1.run.app/api/stats")
       .then((res) => {
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);

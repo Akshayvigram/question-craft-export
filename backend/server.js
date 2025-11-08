@@ -36,14 +36,22 @@ async function startServer() {
     const db = createDbPool(config);
     const transporter = createTransporter(config);
     const protect = createTokenAuthMiddleware(db);
+    // After config loaded successfully
+const perplexityService = createPerplexityService(config);
+
     // 3. CREATE EXPRESS APP
     const app = express();
 
     // 4. SET UP GLOBAL MIDDLEWARE
-    app.use(cors({
-      origin: ['http://localhost:8080', 'http://localhost:3000', config.FRONTEND_URL],
-      credentials: true
-    }));
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    config.FRONTEND_URL
+  ],
+  credentials: true
+}));
+
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
 
@@ -79,7 +87,7 @@ async function startServer() {
     });
 
     // 7. START THE SERVER
-    const PORT = config.PORT || 3001;
+    const PORT = process.env.PORT || 8080;
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`✅ Server is running on port ${PORT}`);
       console.log(`📍 Health check available at http://localhost:${PORT}/health`);

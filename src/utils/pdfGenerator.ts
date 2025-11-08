@@ -251,48 +251,57 @@ import jsPDF from "jspdf";
 
 
 
-export const generatePDF = async (elementId: string, filename: string): Promise<Blob | undefined> => {
+// 
+
+
+
+export const generatePDF = async (
+  elementId: string,
+  filename: string
+): Promise<Blob | undefined> => {
   const element = document.getElementById(elementId);
   if (!element) {
     console.error(`Element with id "${elementId}" not found`);
     return;
   }
 
-  // Your custom styling equivalent to html2pdf config
+  // Define margins and PDF configuration
   const marginInInches = 0.5;
   const pdf = new jsPDF({
-    unit: 'in',
-    format: 'letter', // equivalent to A4 in US
-    orientation: 'portrait',
+    unit: "in",
+    format: "letter", // A4 alternative for US
+    orientation: "portrait",
   });
 
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
 
-  // Convert element to canvas with scale and CORS support
+  // Capture element as canvas with good quality
   const canvas = await html2canvas(element, {
     scale: 2,
     useCORS: true,
+    logging: false,
   });
 
-  const imgData = canvas.toDataURL('image/jpeg', 0.98);
-
+  const imgData = canvas.toDataURL("image/jpeg", 0.98);
   const imgWidth = pageWidth - 2 * marginInInches;
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-  let y = marginInInches;
+  let heightLeft = imgHeight;
+  let position = marginInInches;
 
-  pdf.addImage(imgData, 'JPEG', marginInInches, y, imgWidth, imgHeight);
+  // Add first image
+  pdf.addImage(imgData, "JPEG", marginInInches, position, imgWidth, imgHeight);
+  heightLeft -= pageHeight - 2 * marginInInches;
 
-  // Add pages if image overflows
-  while (y + imgHeight > pageHeight) {
-    y -= pageHeight - 2 * marginInInches;
+  // Add extra pages if content overflows
+  while (heightLeft > 0) {
     pdf.addPage();
-    pdf.addImage(imgData, 'JPEG', marginInInches, y, imgWidth, imgHeight);
+    position = -(imgHeight - heightLeft) + marginInInches;
+    pdf.addImage(imgData, "JPEG", marginInInches, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight - 2 * marginInInches;
   }
 
-  // Save or return as Blob
-  return pdf.output('blob') as Blob;
+  // Return PDF as Blob
+  return pdf.output("blob") as Blob;
 };
-
-

@@ -124,7 +124,7 @@ const MCQGenerator = () => {
     formData.append("image", file);
 
     try {
-      const res = await fetch("https://vinathaal.azhizen.com/api/extract-syllabus", {
+      const res = await fetch("https://vinathaal-backend-905806810470.asia-south1.run.app/api/extract-syllabus", {
         method: "POST",
         headers: {
           'Authorization': `Bearer ${api_token}`

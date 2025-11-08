@@ -95,7 +95,7 @@ const Support = () => {
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     try {
-      const response = await fetch("https://vinathaal.azhizen.com/api/support", {
+      const response = await fetch("https://vinathaal-backend-905806810470.asia-south1.run.app/api/support", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -107,7 +107,7 @@ const Support = () => {
         throw new Error("Server error");
       }
 
-      await fetch("https://vinathaal.azhizen.com/api/slack-alert", {
+      await fetch("https://vinathaal-backend-905806810470.asia-south1.run.app/api/slack-alert", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

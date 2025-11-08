@@ -43,7 +43,7 @@ const ResetPassword = () => {
     setIsLoading(true);
 
     try {
-      const res = await fetch("https://vinathaal.azhizen.com/api/auth/reset-password", {
+      const res = await fetch("https://vinathaal-backend-905806810470.asia-south1.run.app/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 

@@ -53,7 +53,7 @@ const ShareDialog = ({ title, content, pdfBlob }: ShareDialogProps) => {
       formData.append("file", pdfBlob, title);
       formData.append("userName", userName);
 
-      const res = await fetch("https://vinathaal.azhizen.com/api/send-email", {
+      const res = await fetch("https://vinathaal-backend-905806810470.asia-south1.run.app/api/send-email", {
         method: "POST",
         body: formData,
       });

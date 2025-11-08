@@ -31,7 +31,7 @@ const Login = () => {
 
     
     try {
-      const res = await fetch("https://vinathaal.azhizen.com/api/auth/login", {
+      const res = await fetch("https://vinathaal-backend-905806810470.asia-south1.run.app/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -168,7 +168,7 @@ const Login = () => {
 
                       setIsLoading(true);
 
-                      const res = await fetch("https://vinathaal.azhizen.com/api/auth/google", {
+                      const res = await fetch("https://vinathaal-backend-905806810470.asia-south1.run.app/api/auth/google", {
                         method: "POST",
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ token }), // match backend's expected field
